@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salcomp — Analytics Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+:root{
+  --bg:#0d1117;--sur:#161b22;--sur2:#1c2128;--bdr:#21262d;--bdr2:#30363d;
+  --amb:#f0a500;--amb2:#ffd166;--grn:#3fb950;--red:#f85149;
+  --yel:#e3b341;--blu:#388bfd;--pur:#a371f7;--cyn:#39c5cf;
+  --txt:#e6edf3;--mut:#8b949e;--mut2:#6e7681;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-text-size-adjust:100%;}
+input,select,textarea{font-size:16px !important;}
+@media(min-width:861px){input,select,textarea{font-size:13px !important;}}
+
+/* ── HEADER ──────────────────────────────────────────────────────────────── */
+.site-header{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.site-header a.back{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:5px 11px;border-radius:6px;cursor:pointer;text-decoration:none;transition:all .15s;flex-shrink:0;}
+.site-header a.back:hover{border-color:var(--amb);color:var(--amb);}
+.logo{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--amb);letter-spacing:.08em;text-transform:uppercase;}
+.hdr-right{display:flex;gap:14px;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mut);}
+.live-dot{display:inline-flex;align-items:center;gap:6px;}
+.live-dot::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--grn);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── MAIN ────────────────────────────────────────────────────────────────── */
+.main{max-width:1200px;margin:0 auto;padding:24px 28px 60px;}
+.page-title{font-size:22px;font-weight:600;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--mut);margin-bottom:20px;}
+
+/* ── DATE RANGE PILLS ─────────────────────────────────────────────────────── */
+.range-row{display:flex;align-items:center;gap:14px;margin-bottom:24px;flex-wrap:wrap;}
+.range-pills{display:inline-flex;gap:4px;background:var(--sur);border:1px solid var(--bdr);border-radius:8px;padding:4px;}
+.rpill{padding:6px 16px;border-radius:5px;border:none;background:transparent;color:var(--mut);font-size:12px;font-family:'IBM Plex Mono',monospace;font-weight:500;cursor:pointer;transition:all .15s;}
+.rpill:hover{color:var(--txt);}
+.rpill.active{background:rgba(240,165,0,.12);color:var(--amb);}
+.range-meta{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--mut2);}
+.refresh-btn{background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .15s;margin-left:auto;}
+.refresh-btn:hover{border-color:var(--amb);color:var(--amb);}
+
+/* ── LOADING ──────────────────────────────────────────────────────────────── */
+.loading{padding:60px 20px;text-align:center;color:var(--mut);font-size:14px;}
+.loading .spin{display:inline-block;width:18px;height:18px;border:2px solid var(--bdr2);border-top-color:var(--amb);border-radius:50%;animation:spin .8s linear infinite;margin-right:10px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── KPI STRIP ────────────────────────────────────────────────────────────── */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.kpi{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.kpi.k-blu::before{background:var(--blu);}
+.kpi.k-grn::before{background:var(--grn);}
+.kpi.k-amb::before{background:var(--amb);}
+.kpi.k-red::before{background:var(--red);}
+.kpi-label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mut2);margin-bottom:6px;}
+.kpi-val{font-size:28px;font-weight:600;line-height:1;font-family:'IBM Plex Mono',monospace;letter-spacing:-.02em;}
+.kpi.k-blu .kpi-val{color:var(--blu);}
+.kpi.k-grn .kpi-val{color:var(--grn);}
+.kpi.k-amb .kpi-val{color:var(--amb);}
+.kpi.k-red .kpi-val{color:var(--red);}
+.kpi-sub{font-size:11px;color:var(--mut);margin-top:6px;font-family:'IBM Plex Mono',monospace;}
+
+/* ── PANELS ──────────────────────────────────────────────────────────────── */
+.panel{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;margin-bottom:18px;overflow:hidden;}
+.panel-head{padding:13px 20px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.panel-head h2{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);}
+.panel-head .panel-meta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mut2);}
+.panel-body{padding:18px 20px;}
+
+/* legend strip used in chart panels */
+.legend-strip{display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+.lkey{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--mut);font-family:'IBM Plex Mono',monospace;}
+.lkey .dot{width:9px;height:9px;border-radius:2px;}
+.lkey.pott .dot{background:var(--grn);}
+.lkey.wav  .dot{background:var(--blu);}
+.lkey.car  .dot{background:var(--pur);}
+
+/* ── CHART CONTAINERS ────────────────────────────────────────────────────── */
+.chart-wrap{position:relative;width:100%;height:240px;}
+.chart-wrap svg{display:block;width:100%;height:100%;font-family:'IBM Plex Mono',monospace;}
+
+.empty{padding:40px 20px;text-align:center;color:var(--mut2);font-size:13px;}
+.empty-icon{font-size:30px;margin-bottom:10px;opacity:.5;}
+
+/* ── DOWNTIME 2-UP ────────────────────────────────────────────────────────── */
+.dt-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;}
+.dt-causes{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:14px;max-height:260px;overflow-y:auto;}
+.dt-cause-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr);align-items:baseline;}
+.dt-cause-row:last-child{border-bottom:none;}
+.dt-cause-txt{font-size:12px;color:var(--txt);line-height:1.3;}
+.dt-cause-mins{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--red);font-weight:600;white-space:nowrap;}
+.dt-cause-meta{font-size:10px;color:var(--mut2);font-family:'IBM Plex Mono',monospace;margin-top:2px;}
+
+/* ── SCOUT FLAGS ─────────────────────────────────────────────────────────── */
+.scout-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}
+.scout-card{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:14px;}
+.scout-card-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mut2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+.scout-card-num{font-size:24px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+.scout-card.has-attn .scout-card-num{color:var(--red);}
+.scout-card.clean .scout-card-num{color:var(--grn);}
+.scout-card-meta{font-size:10.5px;color:var(--mut);margin-top:4px;font-family:'IBM Plex Mono',monospace;}
+
+.flag-list{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:6px 14px;max-height:300px;overflow-y:auto;}
+.flag-row{padding:10px 0;border-bottom:1px solid var(--bdr);}
+.flag-row:last-child{border-bottom:none;}
+.flag-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:4px;flex-wrap:wrap;}
+.flag-source{display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:2px 7px;border-radius:3px;}
+.flag-source.car{background:rgba(163,113,247,.12);color:var(--pur);}
+.flag-source.wav{background:rgba(56,139,253,.12);color:var(--blu);}
+.flag-source.pott{background:rgba(63,185,80,.12);color:var(--grn);}
+.flag-when{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mut2);}
+.flag-section{font-size:11px;color:var(--mut);font-family:'IBM Plex Mono',monospace;margin-bottom:2px;}
+.flag-item{font-size:12.5px;color:var(--txt);line-height:1.4;}
+.flag-note{font-size:11.5px;color:var(--mut);font-style:italic;margin-top:4px;padding-left:10px;border-left:2px solid rgba(248,81,73,.3);}
+
+/* ── REPORTS BY TECH ─────────────────────────────────────────────────────── */
+.tech-list{padding:6px 0;}
+.tech-row{
+  display:grid;
+  grid-template-columns:140px 1fr 50px;
+  gap:14px;
+  align-items:center;
+  padding:8px 20px;
+  border-bottom:1px solid var(--bdr);
+  transition:background .12s;
+}
+.tech-row:last-child{border-bottom:none;}
+.tech-row:hover{background:rgba(255,255,255,.02);}
+.tech-name{
+  font-size:13px;
+  color:var(--txt);
+  font-weight:500;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.tech-bar-wrap{
+  background:var(--bg);
+  border:1px solid var(--bdr);
+  border-radius:4px;
+  height:14px;
+  overflow:hidden;
+  cursor:default;
+}
+.tech-bar{
+  display:flex;
+  height:100%;
+  transition:width .4s cubic-bezier(.4,0,.2,1);
+}
+.tech-seg{
+  height:100%;
+  transition:opacity .15s;
+}
+.tech-seg:hover{opacity:.75;}
+.tech-count{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:15px;
+  font-weight:600;
+  color:var(--amb);
+  text-align:right;
+}
+.tech-legend{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  padding:12px 20px;
+  border-top:1px solid var(--bdr);
+  background:rgba(0,0,0,.12);
+}
+
+/* ── WIP HEATMAP ─────────────────────────────────────────────────────────── */
+.wip-line-pills{display:inline-flex;gap:3px;background:var(--bg);border:1px solid var(--bdr);border-radius:6px;padding:3px;}
+.wpill{padding:4px 11px;border-radius:4px;border:none;background:transparent;color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;font-weight:500;cursor:pointer;transition:all .15s;}
+.wpill:hover{color:var(--txt);}
+.wpill.active{background:rgba(240,165,0,.14);color:var(--amb);}
+
+.hgrid{display:flex;flex-direction:column;gap:2px;overflow-x:auto;}
+.hrow{display:grid;grid-template-columns:80px 1fr;gap:4px;align-items:center;}
+.hrow-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mut);text-align:right;padding-right:4px;white-space:nowrap;}
+.hrow-label-hdr{height:14px;}
+.hrow-cells{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;min-width:480px;}
+.hcell{height:22px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--txt);background:#1c2128;cursor:default;transition:transform .12s;}
+.hcell:hover{transform:scale(1.15);outline:1px solid var(--amb);z-index:1;position:relative;}
+.hcell-hdr{font-size:9px;color:var(--mut2);background:transparent;height:14px;}
+.hcell-empty{background:#161b22;border:1px dashed var(--bdr);}
+
+.wip-legend{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr);}
+.wip-legend-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mut2);}
+.wip-legend-scale{display:flex;gap:1px;border-radius:3px;overflow:hidden;}
+.wip-legend-cell{width:18px;height:12px;}
+.wip-legend-meta{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mut);}
+
+/* ── RECENT FEED ─────────────────────────────────────────────────────────── */
+.feed{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;}
+.feed-row{padding:11px 16px;border-bottom:1px solid var(--bdr);display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;transition:background .12s;}
+.feed-row:last-child{border-bottom:none;}
+.feed-row:hover{background:rgba(255,255,255,.02);}
+.feed-tag{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:3px;white-space:nowrap;}
+.feed-tag.scout-car{background:rgba(240,165,0,.12);color:var(--amb);}
+.feed-tag.scout-wav{background:rgba(240,165,0,.12);color:var(--amb);}
+.feed-tag.scout-pott{background:rgba(240,165,0,.12);color:var(--amb);}
+.feed-tag.shift-pott{background:rgba(63,185,80,.12);color:var(--grn);}
+.feed-tag.shift-wav{background:rgba(56,139,253,.12);color:var(--blu);}
+.feed-tag.shift-car{background:rgba(163,113,247,.12);color:var(--pur);}
+.feed-text{font-size:13px;color:var(--txt);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.feed-text strong{color:var(--txt);}
+.feed-text .feed-meta{font-size:11px;color:var(--mut);font-family:'IBM Plex Mono',monospace;display:block;margin-top:2px;}
+.feed-when{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mut2);white-space:nowrap;}
+.feed-link{color:inherit;text-decoration:none;display:contents;}
+
+/* ── TOAST ──────────────────────────────────────────────────────────────── */
+.toast{position:fixed;bottom:22px;right:22px;padding:11px 18px;border-radius:7px;font-size:13px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.45);transform:translateY(70px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:999;}
+.toast.show{transform:translateY(0);opacity:1;}
+.t-ok{background:var(--grn);color:#000;}
+.t-warn{background:var(--red);color:#fff;}
+
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px;}
+
+/* ── MOBILE ─────────────────────────────────────────────────────────────── */
+@media(max-width:860px){
+  .site-header{padding:0 14px;height:52px;}
+  .logo{font-size:11px;}
+  .main{padding:14px 14px 40px;}
+  .page-title{font-size:18px;}
+  .kpis{grid-template-columns:1fr 1fr;gap:10px;}
+  .kpi{padding:14px 16px;}
+  .kpi-val{font-size:22px;}
+  .dt-grid{grid-template-columns:1fr;}
+  .scout-grid{grid-template-columns:1fr 1fr 1fr;}
+  .panel-body{padding:14px;}
+  .panel-head{padding:11px 14px;}
+  .chart-wrap{height:200px;}
+  .feed-row{grid-template-columns:auto 1fr;gap:8px;padding:10px 12px;}
+  .feed-when{grid-column:2;font-size:10px;margin-top:2px;}
+  .range-pills{flex:1;}
+  .rpill{flex:1;text-align:center;padding:7px 4px;}
+  .refresh-btn{margin-left:0;}
+  .tech-row{grid-template-columns:100px 1fr 40px;gap:10px;padding:8px 14px;}
+  .tech-name{font-size:12px;}
+  .tech-count{font-size:14px;}
+  .tech-legend{padding:10px 14px;gap:12px;}
+  .hrow{grid-template-columns:50px 1fr;gap:3px;}
+  .hrow-label{font-size:9.5px;padding-right:2px;}
+  .hcell{height:18px;font-size:9px;}
+  .hcell-hdr{font-size:8px;}
+  .wip-line-pills{flex-wrap:wrap;}
+  .wpill{padding:5px 10px;font-size:10.5px;}
+}
+@media(max-width:480px){
+  .scout-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="back" href="index.html">← Back</a>
+  <div class="logo">📊 Salcomp — Analytics Dashboard</div>
+  <div class="hdr-right">
+    <span class="live-dot"><span id="hdrDate"></span></span>
+  </div>
+</header>
+
+<main class="main">
+
+  <div class="page-title">Operations Overview</div>
+  <div class="page-sub">Live data from all check sheets and shift reports — auto-pulls from Supabase on load.</div>
+
+  <!-- DATE RANGE -->
+  <div class="range-row">
+    <div class="range-pills" id="rangePills">
+      <button class="rpill active" data-days="7">7 day</button>
+      <button class="rpill" data-days="30">30 day</button>
+      <button class="rpill" data-days="90">90 day</button>
+      <button class="rpill" data-days="0">All time</button>
+    </div>
+    <div class="range-meta" id="rangeMeta"></div>
+    <button class="refresh-btn" onclick="loadAll(true)">↻ Refresh</button>
+  </div>
+
+  <div id="content">
+    <div class="loading"><span class="spin"></span>Loading data from all sources…</div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SUPABASE CONFIG ────────────────────────────────────────────────────────────
+const SB_URL = 'https://zgxklwqtnjuhwmigbdkd.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpneGtsd3F0bmp1aHdtaWdiZGtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTcwMjUsImV4cCI6MjA5MjIzMzAyNX0.EHTVKXKr0PRoutgLnpHMAFHElvjkiBlDH1ZNXdyoxIM';
+
+function sbHeaders(){
+  return {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+}
+
+// ── TABLE → SOURCE METADATA ────────────────────────────────────────────────────
+const SOURCES = [
+  {key:'scout-car', table:'reports',                label:'Scout — Carousel',  kind:'scout',  link:'Carousel_Scout_Checklist.html'},
+  {key:'scout-wav', table:'wave3_scout_reports',    label:'Scout — Wave-3',    kind:'scout',  link:'Wave3_Scout_Checklist.html'},
+  {key:'scout-pott',table:'potting_scout_reports',  label:'Scout — Potting',   kind:'scout',  link:'Potting_Scout_Checklist.html'},
+  {key:'shift-pott',table:'shift_reports',          label:'Shift — Potting',   kind:'shift',  link:'Potting_Shift_Report.html',  line:'pott'},
+  {key:'shift-wav', table:'wave3_reports',          label:'Shift — Wave-3',    kind:'shift',  link:'Wave3_Shift_Report.html',    line:'wav'},
+  {key:'shift-car', table:'carousel_reports',       label:'Shift — Carousel',  kind:'shift',  link:'Carousel_Shift_Report.html', line:'car'},
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────────────
+let allData = {};      // {sourceKey: rows[]}
+let rangeDays = 7;     // 0 = all
+let wipLineFilter = 'all';  // 'all'|'pott'|'wav'|'car'
+
+// ── DATE HELPERS ───────────────────────────────────────────────────────────────
+function withinRange(rowDate){
+  if(rangeDays===0) return true;
+  if(!rowDate) return false;
+  const d = new Date(rowDate);
+  if(isNaN(d.getTime())) return false;
+  const cutoff = Date.now() - rangeDays*86400000;
+  return d.getTime() >= cutoff;
+}
+function dayKey(d){
+  // YYYY-MM-DD in local time
+  const dt = new Date(d);
+  if(isNaN(dt.getTime())) return null;
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+}
+function dayLabel(key){
+  const [y,m,d] = key.split('-').map(Number);
+  const dt = new Date(y,m-1,d);
+  return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function relTime(iso){
+  const d = new Date(iso);
+  const now = Date.now();
+  const diff = (now - d.getTime())/1000;
+  if(diff<60) return Math.floor(diff)+'s ago';
+  if(diff<3600) return Math.floor(diff/60)+'m ago';
+  if(diff<86400) return Math.floor(diff/3600)+'h ago';
+  if(diff<604800) return Math.floor(diff/86400)+'d ago';
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+// ── DATA FETCH ─────────────────────────────────────────────────────────────────
+async function fetchTable(src){
+  try {
+    const url = `${SB_URL}/rest/v1/${src.table}?order=submitted_at.desc&limit=500`;
+    const res = await fetch(url, {headers: sbHeaders()});
+    if(!res.ok){
+      console.warn(`Failed ${src.table}: ${res.status}`);
+      return [];
+    }
+    return await res.json();
+  } catch(e){
+    console.warn(`Error ${src.table}:`, e);
+    return [];
+  }
+}
+
+async function loadAll(showToastMsg){
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="loading"><span class="spin"></span>Loading data from all sources…</div>';
+
+  const results = await Promise.all(SOURCES.map(s => fetchTable(s)));
+  allData = {};
+  SOURCES.forEach((s,i) => { allData[s.key] = results[i] || []; });
+
+  if(showToastMsg) showToast('✓ Refreshed — all sources','t-ok');
+  render();
+}
+
+// ── ROW NORMALIZATION ──────────────────────────────────────────────────────────
+// Each row → unified shape with .when, .source, .kind, .row (raw)
+function normalizedRows(){
+  const out = [];
+  SOURCES.forEach(src => {
+    (allData[src.key]||[]).forEach(row => {
+      out.push({
+        src,
+        when: row.submitted_at,
+        date: row.date || (row.submitted_at ? row.submitted_at.split('T')[0] : null),
+        row,
+      });
+    });
+  });
+  return out;
+}
+function filteredRows(){
+  return normalizedRows().filter(r => withinRange(r.when));
+}
+
+// ── KPI COMPUTATIONS ───────────────────────────────────────────────────────────
+function computeKpis(rows){
+  let reportCt = rows.length;
+  let prodTotal = 0;
+  let dtTotal = 0;
+  let scoutAttn = 0;
+  rows.forEach(r => {
+    if(r.src.kind==='shift'){
+      const p = parseFloat(r.row.production_total);
+      if(!isNaN(p)) prodTotal += p;
+      const dt = parseFloat(r.row.downtime_total);
+      if(!isNaN(dt)) dtTotal += dt;
+    } else if(r.src.kind==='scout'){
+      const a = parseInt(r.row.attn_count);
+      if(!isNaN(a)) scoutAttn += a;
+    }
+  });
+  return {reportCt, prodTotal, dtTotal, scoutAttn};
+}
+
+// ── PRODUCTION BY DAY × LINE ──────────────────────────────────────────────────
+function buildProductionSeries(rows){
+  // shift only — group by date, by line key
+  const byDay = {};  // {dayKey: {pott:n, wav:n, car:n}}
+  rows.forEach(r => {
+    if(r.src.kind!=='shift') return;
+    const k = r.date;
+    if(!k) return;
+    const p = parseFloat(r.row.production_total);
+    if(isNaN(p)) return;
+    if(!byDay[k]) byDay[k] = {pott:0, wav:0, car:0};
+    byDay[k][r.src.line] = (byDay[k][r.src.line]||0) + p;
+  });
+  const days = Object.keys(byDay).sort();
+  return {days, byDay};
+}
+
+// ── DOWNTIME ───────────────────────────────────────────────────────────────────
+function buildDowntimeSeries(rows){
+  const byDay = {};  // {dayKey: total mins}
+  rows.forEach(r => {
+    if(r.src.kind!=='shift') return;
+    const k = r.date;
+    if(!k) return;
+    const dt = parseFloat(r.row.downtime_total);
+    if(isNaN(dt)) return;
+    byDay[k] = (byDay[k]||0) + dt;
+  });
+  const days = Object.keys(byDay).sort();
+  return {days, byDay};
+}
+function topCauses(rows){
+  const out = [];
+  rows.forEach(r => {
+    if(r.src.kind!=='shift') return;
+    const events = r.row.downtime_events;
+    if(!Array.isArray(events)) return;
+    events.forEach(ev => {
+      const mins = parseFloat(ev.mins);
+      if(isNaN(mins)||mins<=0) return;
+      const prob = (ev.prob||'').trim();
+      if(!prob) return;
+      out.push({mins, prob, src:r.src, when:r.when, action:(ev.action||'').trim()});
+    });
+  });
+  out.sort((a,b)=>b.mins-a.mins);
+  return out.slice(0,12);
+}
+
+// ── WIP HEATMAP ───────────────────────────────────────────────────────────────
+// Builds a {dayKey: {hour: {sum, count}}} structure averaged across reports.
+// `lineFilter` = 'all' | 'pott' | 'wav' | 'car'
+function buildWipHeatmap(rows, lineFilter){
+  const grid = {};   // dayKey -> [24] of {sum, count, contributors:[]}
+  const byKey = {};  // dayKey -> Date for sorting
+  rows.forEach(r => {
+    if(r.src.kind !== 'shift') return;
+    if(lineFilter !== 'all' && r.src.line !== lineFilter) return;
+    const wip = r.row.wip_hourly;
+    if(!Array.isArray(wip)) return;
+    const k = r.date;
+    if(!k) return;
+    if(!grid[k]){
+      grid[k] = Array.from({length:24}, () => ({sum:0, count:0, contributors:[]}));
+      byKey[k] = new Date(k);
+    }
+    for(let h=0; h<24 && h<wip.length; h++){
+      const v = parseFloat(wip[h]);
+      if(isNaN(v)) continue;
+      const cell = grid[k][h];
+      cell.sum += v;
+      cell.count += 1;
+      cell.contributors.push({tech: r.row.tech_name||'?', line: r.src.label, value: v});
+    }
+  });
+  // Sort days descending (newest at top)
+  const days = Object.keys(grid).sort((a,b) => byKey[b] - byKey[a]);
+  // Find max average value across all cells (for color scaling)
+  let max = 0, anyData = false;
+  days.forEach(d => grid[d].forEach(c => {
+    if(c.count > 0){
+      anyData = true;
+      const avg = c.sum / c.count;
+      if(avg > max) max = avg;
+    }
+  }));
+  return {days, grid, max, anyData};
+}
+
+// ── SCOUT FLAGS ────────────────────────────────────────────────────────────────
+function scoutSummary(rows){
+  const summary = {};  // {sourceKey: {reports, attnTotal}}
+  ['scout-car','scout-wav','scout-pott'].forEach(k => summary[k] = {reports:0, attnTotal:0});
+  rows.forEach(r => {
+    if(r.src.kind!=='scout') return;
+    const s = summary[r.src.key];
+    if(!s) return;
+    s.reports++;
+    const a = parseInt(r.row.attn_count);
+    if(!isNaN(a)) s.attnTotal += a;
+  });
+  return summary;
+}
+
+// ── REPORTS BY TECHNICIAN ─────────────────────────────────────────────────────
+function techCounts(rows){
+  // {techName: {total, byKey:{sourceKey:n}, lastWhen}}
+  const map = {};
+  rows.forEach(r => {
+    let name = (r.row.tech || r.row.tech_name || '').trim();
+    if(!name) name = 'Unknown';
+    if(!map[name]) map[name] = {total:0, byKey:{}, lastWhen:null};
+    map[name].total++;
+    map[name].byKey[r.src.key] = (map[name].byKey[r.src.key]||0) + 1;
+    if(!map[name].lastWhen || new Date(r.when) > new Date(map[name].lastWhen)){
+      map[name].lastWhen = r.when;
+    }
+  });
+  // Convert to sorted array, biggest first
+  return Object.entries(map)
+    .map(([name, d]) => ({name, ...d}))
+    .sort((a,b) => b.total - a.total || a.name.localeCompare(b.name));
+}
+
+function recentFlags(rows){
+  // dig into sections[].flaggedItems for each scout report
+  const out = [];
+  rows.forEach(r => {
+    if(r.src.kind!=='scout') return;
+    const secs = r.row.sections;
+    if(!Array.isArray(secs)) return;
+    secs.forEach(sec => {
+      const flagged = sec.flaggedItems;
+      if(!Array.isArray(flagged)) return;
+      flagged.forEach(fi => {
+        out.push({
+          when: r.when,
+          src: r.src,
+          tech: r.row.tech || 'Unknown',
+          line: r.row.line || '—',
+          secNum: sec.num,
+          secTitle: sec.title,
+          item: fi.item,
+          note: fi.note || '',
+        });
+      });
+    });
+  });
+  out.sort((a,b)=> new Date(b.when) - new Date(a.when));
+  return out.slice(0,15);
+}
+
+// ── RECENT FEED ────────────────────────────────────────────────────────────────
+function recentFeed(rows){
+  const sorted = rows.slice().sort((a,b)=> new Date(b.when) - new Date(a.when));
+  return sorted.slice(0,15);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+function render(){
+  const rows = filteredRows();
+  const allRows = normalizedRows();
+  const meta = document.getElementById('rangeMeta');
+  meta.textContent = rangeDays===0
+    ? `All time · ${allRows.length} reports`
+    : `Last ${rangeDays} days · ${rows.length} of ${allRows.length} reports`;
+
+  if(rows.length===0){
+    document.getElementById('content').innerHTML = `
+      <div class="empty" style="background:var(--sur);border:1px solid var(--bdr);border-radius:10px;">
+        <div class="empty-icon">📭</div>
+        <div>No reports submitted in this range yet.</div>
+        <div style="font-size:11px;margin-top:8px;color:var(--mut2);">Try a wider date range or submit some reports first.</div>
+      </div>`;
+    return;
+  }
+
+  const k = computeKpis(rows);
+  const prod = buildProductionSeries(rows);
+  const dt = buildDowntimeSeries(rows);
+  const causes = topCauses(rows);
+  const wip = buildWipHeatmap(rows, wipLineFilter);
+  const scout = scoutSummary(rows);
+  const flags = recentFlags(rows);
+  const techs = techCounts(rows);
+  const feed = recentFeed(rows);
+
+  document.getElementById('content').innerHTML = `
+    ${renderKPIs(k)}
+    ${renderProduction(prod)}
+    ${renderDowntime(dt, causes)}
+    ${renderWipHeatmap(wip)}
+    ${renderScout(scout, flags)}
+    ${renderTechs(techs)}
+    ${renderFeed(feed)}
+  `;
+
+  // Now actually draw the SVGs (innerHTML doesn't run scripts)
+  drawProductionChart(prod);
+  drawDowntimeChart(dt);
+  drawWipHeatmap(wip);
+
+  // Wire up the WIP line filter pills (re-renders on click)
+  const pills = document.getElementById('wipLinePills');
+  if(pills){
+    pills.addEventListener('click', e => {
+      const btn = e.target.closest('.wpill');
+      if(!btn) return;
+      wipLineFilter = btn.dataset.line;
+      render();
+    });
+  }
+}
+
+// ── KPI strip ────────────────────────────────────────────────────────────────
+function renderKPIs(k){
+  return `
+    <div class="kpis">
+      <div class="kpi k-blu">
+        <div class="kpi-label">Reports Submitted</div>
+        <div class="kpi-val">${k.reportCt.toLocaleString()}</div>
+        <div class="kpi-sub">scout + shift, all lines</div>
+      </div>
+      <div class="kpi k-grn">
+        <div class="kpi-label">Production (units)</div>
+        <div class="kpi-val">${k.prodTotal.toLocaleString()}</div>
+        <div class="kpi-sub">sum of shift totals</div>
+      </div>
+      <div class="kpi k-amb">
+        <div class="kpi-label">Downtime (mins)</div>
+        <div class="kpi-val">${k.dtTotal.toLocaleString()}</div>
+        <div class="kpi-sub">recorded in shift reports</div>
+      </div>
+      <div class="kpi k-red">
+        <div class="kpi-label">Scout Flags</div>
+        <div class="kpi-val">${k.scoutAttn.toLocaleString()}</div>
+        <div class="kpi-sub">items needing attention</div>
+      </div>
+    </div>`;
+}
+
+// ── Production trends ───────────────────────────────────────────────────────
+function renderProduction(prod){
+  const hasData = prod.days.length>0;
+  return `
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Production Trend — Units per Day</h2>
+        <div class="legend-strip">
+          <span class="lkey pott"><span class="dot"></span>Potting</span>
+          <span class="lkey wav"><span class="dot"></span>Wave-3</span>
+          <span class="lkey car"><span class="dot"></span>Carousel</span>
+        </div>
+      </div>
+      <div class="panel-body">
+        ${hasData
+          ? `<div class="chart-wrap" id="prodChart"></div>`
+          : `<div class="empty"><div class="empty-icon">📉</div>No production data in this range.</div>`}
+      </div>
+    </div>`;
+}
+
+function drawProductionChart(prod){
+  const el = document.getElementById('prodChart');
+  if(!el || !prod.days.length) return;
+  const W = el.clientWidth, H = el.clientHeight;
+  const padL = 38, padR = 14, padT = 12, padB = 26;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+
+  // Find max stacked height per day
+  let max = 0;
+  prod.days.forEach(d => {
+    const v = prod.byDay[d];
+    const total = (v.pott||0) + (v.wav||0) + (v.car||0);
+    if(total > max) max = total;
+  });
+  if(max===0) max = 10;
+  // round max up to nice number
+  const niceMax = niceRoundUp(max);
+
+  // 5 grid lines
+  const gridY = [0, 0.25, 0.5, 0.75, 1].map(t => Math.round(niceMax*t));
+  const yPos = v => padT + innerH - (v/niceMax)*innerH;
+
+  // Build line data per source
+  const sources = ['pott','wav','car'];
+  const colors = {pott:'#3fb950', wav:'#388bfd', car:'#a371f7'};
+  const xPos = i => prod.days.length>1
+    ? padL + (i/(prod.days.length-1))*innerW
+    : padL + innerW/2;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
+
+  // Y grid
+  gridY.forEach(v => {
+    const y = yPos(v);
+    svg += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#21262d" stroke-width="1"/>`;
+    svg += `<text x="${padL-6}" y="${y+3}" text-anchor="end" font-size="9" fill="#6e7681">${v}</text>`;
+  });
+
+  // X labels (sparse)
+  const labelEvery = Math.max(1, Math.ceil(prod.days.length/6));
+  prod.days.forEach((d, i) => {
+    if(i % labelEvery !== 0 && i !== prod.days.length-1) return;
+    const x = xPos(i);
+    svg += `<text x="${x}" y="${H-8}" text-anchor="middle" font-size="9" fill="#6e7681">${dayLabel(d)}</text>`;
+  });
+
+  // Data lines + circles
+  sources.forEach(s => {
+    const pts = prod.days.map((d,i) => [xPos(i), yPos(prod.byDay[d][s]||0)]);
+    if(pts.length>1){
+      const path = pts.map((p,i)=> (i===0?'M':'L')+p[0]+','+p[1]).join(' ');
+      svg += `<path d="${path}" fill="none" stroke="${colors[s]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+    }
+    pts.forEach(p => {
+      svg += `<circle cx="${p[0]}" cy="${p[1]}" r="2.5" fill="${colors[s]}"/>`;
+    });
+  });
+
+  svg += '</svg>';
+  el.innerHTML = svg;
+}
+
+// ── Downtime ────────────────────────────────────────────────────────────────
+function renderDowntime(dt, causes){
+  const hasData = dt.days.length>0 || causes.length>0;
+  return `
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Downtime — Minutes per Day &amp; Top Causes</h2>
+        <div class="panel-meta">${causes.length} event${causes.length!==1?'s':''} ≥1 min</div>
+      </div>
+      <div class="panel-body">
+        ${hasData ? `
+          <div class="dt-grid">
+            <div class="chart-wrap" id="dtChart"></div>
+            <div class="dt-causes">
+              ${causes.length===0
+                ? `<div class="empty" style="padding:20px 10px"><div class="empty-icon">✓</div>No major downtime events</div>`
+                : causes.map(c => `
+                  <div class="dt-cause-row">
+                    <div>
+                      <div class="dt-cause-txt">${escapeHtml(c.prob)}</div>
+                      <div class="dt-cause-meta">${escapeHtml(c.src.label)} · ${relTime(c.when)}</div>
+                    </div>
+                    <div class="dt-cause-mins">${c.mins} min</div>
+                  </div>
+                `).join('')}
+            </div>
+          </div>
+        ` : `<div class="empty"><div class="empty-icon">✓</div>No downtime recorded in this range.</div>`}
+      </div>
+    </div>`;
+}
+
+function drawDowntimeChart(dt){
+  const el = document.getElementById('dtChart');
+  if(!el || !dt.days.length) return;
+  const W = el.clientWidth, H = el.clientHeight;
+  const padL = 38, padR = 14, padT = 12, padB = 26;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+
+  let max = 0;
+  dt.days.forEach(d => { if(dt.byDay[d] > max) max = dt.byDay[d]; });
+  if(max===0) max = 10;
+  const niceMax = niceRoundUp(max);
+
+  const gridY = [0, 0.25, 0.5, 0.75, 1].map(t => Math.round(niceMax*t));
+  const yPos = v => padT + innerH - (v/niceMax)*innerH;
+
+  // Bars
+  const barCount = dt.days.length;
+  const barGap = 4;
+  const barW = Math.max(6, (innerW - barGap*(barCount-1))/barCount);
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
+
+  gridY.forEach(v => {
+    const y = yPos(v);
+    svg += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#21262d" stroke-width="1"/>`;
+    svg += `<text x="${padL-6}" y="${y+3}" text-anchor="end" font-size="9" fill="#6e7681">${v}</text>`;
+  });
+
+  dt.days.forEach((d, i) => {
+    const x = padL + i*(barW+barGap);
+    const v = dt.byDay[d];
+    const y = yPos(v);
+    const h = padT + innerH - y;
+    svg += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="#f0a500" opacity="0.85" rx="2"/>`;
+    if(barCount<=14 || i % Math.ceil(barCount/8) === 0){
+      svg += `<text x="${x+barW/2}" y="${H-8}" text-anchor="middle" font-size="9" fill="#6e7681">${dayLabel(d)}</text>`;
+    }
+  });
+
+  svg += '</svg>';
+  el.innerHTML = svg;
+}
+
+// ── WIP Heatmap ─────────────────────────────────────────────────────────────
+function renderWipHeatmap(wip){
+  return `
+    <div class="panel">
+      <div class="panel-head">
+        <h2>WIP Remaining — Hourly Heatmap</h2>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="panel-meta" style="margin-right:6px">Line:</span>
+          <div class="wip-line-pills" id="wipLinePills">
+            <button class="wpill ${wipLineFilter==='all'?'active':''}" data-line="all">All</button>
+            <button class="wpill ${wipLineFilter==='pott'?'active':''}" data-line="pott">Potting</button>
+            <button class="wpill ${wipLineFilter==='wav'?'active':''}" data-line="wav">Wave-3</button>
+            <button class="wpill ${wipLineFilter==='car'?'active':''}" data-line="car">Carousel</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        ${!wip.anyData
+          ? `<div class="empty"><div class="empty-icon">📭</div>No WIP data submitted in this range${wipLineFilter!=='all'?' for the selected line':''}.</div>`
+          : `<div id="wipHeatmap"></div>
+             <div class="wip-legend">
+               <span class="wip-legend-label">Less</span>
+               <div class="wip-legend-scale">
+                 ${[0,0.2,0.4,0.6,0.8,1].map(t => `<div class="wip-legend-cell" style="background:${wipColor(t,1)}"></div>`).join('')}
+               </div>
+               <span class="wip-legend-label">More</span>
+               <span class="wip-legend-meta">peak avg: ${wip.max.toFixed(1)}</span>
+             </div>`}
+      </div>
+    </div>`;
+}
+
+function wipColor(value, max){
+  if(value === null || max === 0) return '#1c2128';
+  const t = Math.max(0, Math.min(1, value / max));
+  const alpha = 0.06 + t * 0.89;
+  return `rgba(240,165,0,${alpha.toFixed(3)})`;
+}
+
+function drawWipHeatmap(wip){
+  const el = document.getElementById('wipHeatmap');
+  if(!el || !wip.anyData) return;
+
+  const hourHdr = Array.from({length:24}, (_,h) => `<div class="hcell hcell-hdr">${String(h).padStart(2,'0')}</div>`).join('');
+  const rowsHtml = wip.days.map(d => {
+    const cells = wip.grid[d].map((c,h) => {
+      if(c.count === 0){
+        return `<div class="hcell hcell-empty" title="${dayLabel(d)} ${String(h).padStart(2,'0')}:00 — no data"></div>`;
+      }
+      const avg = c.sum / c.count;
+      const color = wipColor(avg, wip.max);
+      const tip = `${dayLabel(d)} ${String(h).padStart(2,'0')}:00 — avg ${avg.toFixed(1)} (${c.count} report${c.count!==1?'s':''})`;
+      return `<div class="hcell" style="background:${color}" title="${escapeHtml(tip)}">${c.count > 1 ? avg.toFixed(0) : Math.round(avg)}</div>`;
+    }).join('');
+    return `
+      <div class="hrow">
+        <div class="hrow-label">${dayLabel(d)}</div>
+        <div class="hrow-cells">${cells}</div>
+      </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="hgrid">
+      <div class="hrow hhdr">
+        <div class="hrow-label hrow-label-hdr"></div>
+        <div class="hrow-cells">${hourHdr}</div>
+      </div>
+      ${rowsHtml}
+    </div>`;
+}
+
+// ── Scout flags ─────────────────────────────────────────────────────────────
+function renderScout(scout, flags){
+  const card = (key, label) => {
+    const s = scout[key];
+    const cls = s.attnTotal>0 ? 'has-attn' : (s.reports>0 ? 'clean' : '');
+    const meta = s.reports===0 ? 'no reports yet' : `from ${s.reports} report${s.reports!==1?'s':''}`;
+    return `
+      <div class="scout-card ${cls}">
+        <div class="scout-card-name">${label}</div>
+        <div class="scout-card-num">${s.attnTotal}</div>
+        <div class="scout-card-meta">${meta}</div>
+      </div>`;
+  };
+  return `
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Scout Flags by Sheet</h2>
+        <div class="panel-meta">items needing attention</div>
+      </div>
+      <div class="panel-body">
+        <div class="scout-grid">
+          ${card('scout-car', 'Carousel Scout')}
+          ${card('scout-wav', 'Wave-3 Scout')}
+          ${card('scout-pott','Potting Scout')}
+        </div>
+        ${flags.length===0
+          ? `<div class="empty" style="padding:20px;background:var(--bg);border:1px solid var(--bdr);border-radius:8px"><div class="empty-icon">✓</div>No flagged items in this range.</div>`
+          : `<div class="flag-list">
+              ${flags.map(f => `
+                <div class="flag-row">
+                  <div class="flag-head">
+                    <span class="flag-source ${f.src.key.split('-')[1]}">${escapeHtml(f.src.label)}</span>
+                    <span class="flag-when">${escapeHtml(f.tech)} · Line ${escapeHtml(f.line)} · ${relTime(f.when)}</span>
+                  </div>
+                  <div class="flag-section">§${escapeHtml(f.secNum)} ${escapeHtml(f.secTitle)}</div>
+                  <div class="flag-item">${escapeHtml(f.item)}</div>
+                  ${f.note ? `<div class="flag-note">${escapeHtml(f.note)}</div>` : ''}
+                </div>
+              `).join('')}
+            </div>`}
+      </div>
+    </div>`;
+}
+
+// ── Reports by Technician ───────────────────────────────────────────────────
+function renderTechs(techs){
+  if(techs.length===0){
+    return `
+      <div class="panel">
+        <div class="panel-head"><h2>Reports by Technician</h2></div>
+        <div class="panel-body">
+          <div class="empty"><div class="empty-icon">👤</div>No reports yet.</div>
+        </div>
+      </div>`;
+  }
+  // Color per source key — matches the rest of the dashboard
+  const colors = {
+    'scout-car':  '#f0a500',
+    'scout-wav':  '#f0a500',
+    'scout-pott': '#f0a500',
+    'shift-pott': '#3fb950',
+    'shift-wav':  '#388bfd',
+    'shift-car':  '#a371f7',
+  };
+  // Order in the stacked bar (left to right)
+  const order = ['scout-car','scout-wav','scout-pott','shift-pott','shift-wav','shift-car'];
+
+  // Find max total for bar scaling
+  const maxTotal = techs[0].total;  // already sorted desc
+
+  // Total reports across all techs (for bottom summary)
+  const totalReports = techs.reduce((a,t)=>a+t.total,0);
+  const scoutTotal = techs.reduce((a,t)=>a + (t.byKey['scout-car']||0)+(t.byKey['scout-wav']||0)+(t.byKey['scout-pott']||0), 0);
+  const shiftTotal = totalReports - scoutTotal;
+
+  return `
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Reports by Technician</h2>
+        <div class="panel-meta">${techs.length} tech${techs.length!==1?'s':''} · ${totalReports} report${totalReports!==1?'s':''} (${scoutTotal} scout, ${shiftTotal} shift)</div>
+      </div>
+      <div class="panel-body" style="padding:0">
+        <div class="tech-list">
+          ${techs.map(t => {
+            const segs = order
+              .filter(k => (t.byKey[k]||0) > 0)
+              .map(k => ({key:k, n:t.byKey[k], pct: (t.byKey[k]/t.total)*100}));
+            const barWidth = (t.total/maxTotal)*100;
+            const tooltip = order
+              .filter(k => (t.byKey[k]||0) > 0)
+              .map(k => {
+                const lbl = SOURCES.find(s => s.key===k).label;
+                return `${lbl}: ${t.byKey[k]}`;
+              }).join(' · ');
+            return `
+              <div class="tech-row">
+                <div class="tech-name">${escapeHtml(t.name)}</div>
+                <div class="tech-bar-wrap" title="${escapeHtml(tooltip)}">
+                  <div class="tech-bar" style="width:${barWidth}%">
+                    ${segs.map(s => `<div class="tech-seg" style="width:${s.pct}%;background:${colors[s.key]}"></div>`).join('')}
+                  </div>
+                </div>
+                <div class="tech-count">${t.total}</div>
+              </div>`;
+          }).join('')}
+        </div>
+        <div class="tech-legend">
+          <span class="lkey"><span class="dot" style="background:#f0a500"></span>Scout</span>
+          <span class="lkey"><span class="dot" style="background:#3fb950"></span>Shift — Potting</span>
+          <span class="lkey"><span class="dot" style="background:#388bfd"></span>Shift — Wave-3</span>
+          <span class="lkey"><span class="dot" style="background:#a371f7"></span>Shift — Carousel</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Recent feed ─────────────────────────────────────────────────────────────
+function renderFeed(feed){
+  return `
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Recent Submissions</h2>
+        <div class="panel-meta">last ${feed.length} across all sources</div>
+      </div>
+      <div class="panel-body" style="padding:0">
+        <div class="feed">
+          ${feed.map(r => {
+            const tag = r.src.key;
+            const tech = r.row.tech || r.row.tech_name || 'Unknown';
+            const line = r.row.line ? `Line ${r.row.line}` : '';
+            const shift = r.row.shift ? ` · ${r.row.shift.split('—')[0].trim()}` : '';
+            const meta = r.src.kind==='shift' && r.row.production_total
+              ? `Production: ${r.row.production_total}` + (r.row.downtime_total ? ` · DT: ${r.row.downtime_total}m` : '')
+              : (r.src.kind==='scout' && r.row.attn_count !== undefined
+                 ? (r.row.attn_count>0 ? `⚠ ${r.row.attn_count} flagged` : '✓ all clear')
+                 : '');
+            return `
+              <a class="feed-link" href="${r.src.link}">
+                <div class="feed-row">
+                  <span class="feed-tag ${tag}">${shortTag(r.src)}</span>
+                  <div class="feed-text">
+                    <strong>${escapeHtml(tech)}</strong> ${line ? '· '+escapeHtml(line) : ''}${escapeHtml(shift)}
+                    <span class="feed-meta">${escapeHtml(meta)}</span>
+                  </div>
+                  <span class="feed-when">${relTime(r.when)}</span>
+                </div>
+              </a>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function shortTag(src){
+  // Short pill labels
+  return ({
+    'scout-car': 'CAR ⊙',
+    'scout-wav': 'WAV ⊙',
+    'scout-pott':'POT ⊙',
+    'shift-pott':'POT ⊟',
+    'shift-wav': 'WAV ⊟',
+    'shift-car': 'CAR ⊟',
+  })[src.key] || src.key;
+}
+
+// ── HELPERS ─────────────────────────────────────────────────────────────────
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function niceRoundUp(n){
+  if(n<=10) return 10;
+  const mag = Math.pow(10, Math.floor(Math.log10(n)));
+  const norm = n/mag;
+  let nice;
+  if(norm<=1) nice=1;
+  else if(norm<=2) nice=2;
+  else if(norm<=5) nice=5;
+  else nice=10;
+  return nice * mag;
+}
+function showToast(msg,cls){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${cls} show`;
+  setTimeout(()=>t.className='toast',3000);
+}
+
+// ── DATE PILL HANDLING ──────────────────────────────────────────────────────
+document.getElementById('rangePills').addEventListener('click', e => {
+  const btn = e.target.closest('.rpill');
+  if(!btn) return;
+  document.querySelectorAll('.rpill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  rangeDays = parseInt(btn.dataset.days);
+  render();
+});
+
+// ── REDRAW CHARTS ON RESIZE ─────────────────────────────────────────────────
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const rows = filteredRows();
+    if(rows.length===0) return;
+    drawProductionChart(buildProductionSeries(rows));
+    drawDowntimeChart(buildDowntimeSeries(rows));
+  }, 200);
+});
+
+// ── INIT ────────────────────────────────────────────────────────────────────
+document.getElementById('hdrDate').textContent =
+  new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+
+loadAll();
+</script>
+
+</body>
+</html>
