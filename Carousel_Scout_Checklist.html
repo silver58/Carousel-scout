@@ -421,7 +421,7 @@ input,select,textarea{font-size:16px !important;} /* prevent iOS zoom on focus *
     <div class="fhdr-top">
       <div>
         <div class="ftitle">Carousel — Preventive Maintenance Check Sheet</div>
-        <div class="fsub">25 stations · 238 check points · Visual inspection &amp; functional checks · Complete before any hands-on PM work</div>
+        <div class="fsub">24 stations · 231 check points · Visual inspection &amp; functional checks · Complete before any hands-on PM work</div>
       </div>
       <div class="scout-tag">⚡ Scout Shift — visual checks &amp; functional tests only</div>
     </div>
@@ -710,7 +710,7 @@ const DATA = [
    ]},
   {id:'s09',num:'09',grp:'pcb',
    group:'PCB Station',group_es:'Estación PCB',
-   title:'PCB Loading Trolley',title_es:'Trolley de Carga de PCB',
+   title:'PCB Loading / Unloading Trolley',title_es:'Trolley de Carga / Descarga de PCB',
    items:[
     'Trolley frame and wheels – inspect for damage, flat spots, or worn bearings; clean rails',
     'Trolley drive belt / chain (if motorized) – inspect tension, wear, and tracking',
@@ -721,6 +721,9 @@ const DATA = [
     'PCB magazine / tray locating pins – inspect for wear; verify alignment',
     'PCB magazine clamp / retention mechanism – functional test; inspect airlines',
     'PCB stack level sensor – clean lens; verify detection accuracy',
+    'PCB receiving tray / nest – inspect for wear; verify alignment with placement head',
+    'Tray full / PCB present sensor – clean lens; functional test',
+    'Finished PCB buffer / queue – inspect for jams or misaligned boards',
     'Trolley docking / locking mechanism – functional test; inspect seals',
     'E-stop and safety interlocks – functional test'
    ],
@@ -734,6 +737,9 @@ const DATA = [
     'Pines de localización del cargador de PCB / charola – inspeccionar desgaste; verificar alineación',
     'Sujetador / mecanismo de retención del cargador de PCB – prueba funcional; inspeccionar mangueras de aire',
     'Sensor de nivel de pila de PCB – limpiar lente; verificar precisión de detección',
+    'Charola de recepción de PCB / nido – inspeccionar desgaste; verificar alineación con cabezal de colocación',
+    'Sensor de charola llena / PCB presente – limpiar lente; prueba funcional',
+    'Búfer / fila de PCB terminado – inspeccionar atascos o tarjetas mal alineadas',
     'Mecanismo de acoplamiento / bloqueo del trolley – prueba funcional; inspeccionar sellos',
     'Paro de emergencia y enclavamientos de seguridad – prueba funcional'
    ]},
@@ -762,34 +768,7 @@ const DATA = [
     'Detección de orientación / fiducial de PCB – correr ciclo de prueba; confirmar alineación dentro de especificación',
     'Acoplamientos de motor – inspeccionar desgaste o resbalamiento en todos los ejes'
    ]},
-  {id:'s11',num:'11',grp:'pcb',
-   group:'PCB Station',group_es:'Estación PCB',
-   title:'PCB Unloading Trolley',title_es:'Trolley de Descarga de PCB',
-   items:[
-    'Trolley frame and wheels – inspect for damage, flat spots, or worn bearings; clean rails',
-    'Trolley drive belt / chain (if motorized) – inspect tension, wear, and tracking',
-    'Trolley linear bearings / guide rails – clean; lubricate',
-    'Axis screws / rack & pinion (if servo-driven) – check backlash; lubricate',
-    'Cable carrier / drag chain – inspect links; remove debris',
-    'Trolley home and end-of-travel sensors – clean; functional test',
-    'PCB receiving tray / nest – inspect for wear; verify alignment with placement head',
-    'Tray full / PCB present sensor – clean lens; functional test',
-    'Trolley docking / locking mechanism – functional test; inspect seals',
-    'Finished PCB buffer / queue – inspect for jams or misaligned boards'
-   ],
-   items_es:[
-    'Marco y ruedas del trolley – inspeccionar por daños, planos o rodamientos desgastados; limpiar rieles',
-    'Banda de tracción / cadena del trolley (si es motorizado) – inspeccionar tensión, desgaste y alineación',
-    'Rodamientos lineales del trolley / rieles guía – limpiar; lubricar',
-    'Tornillos de eje / cremallera y piñón (si es servo-controlado) – verificar juego; lubricar',
-    'Portacables / cadena portacables – inspeccionar eslabones; remover residuos',
-    'Sensores de inicio y fin de carrera del trolley – limpiar; prueba funcional',
-    'Charola de recepción de PCB / nido – inspeccionar desgaste; verificar alineación con cabezal de colocación',
-    'Sensor de charola llena / PCB presente – limpiar lente; prueba funcional',
-    'Mecanismo de acoplamiento / bloqueo del trolley – prueba funcional; inspeccionar sellos',
-    'Búfer / fila de PCB terminado – inspeccionar atascos o tarjetas mal alineadas'
-   ]},
-  {id:'s12',num:'12',grp:'c2',
+  {id:'s11',num:'11',grp:'c2',
    group:'Carousel 2',group_es:'Carrusel 2',
    title:'C2 – Base Placement',title_es:'C2 – Colocación de Base',
    items:[
@@ -820,7 +799,7 @@ const DATA = [
     'Rieles guía y topes – inspeccionar desgaste; verificar tornillería de montaje',
     'Paro de emergencia y enclavamientos de seguridad – prueba funcional'
    ]},
-  {id:'s13',num:'13',grp:'c2',
+  {id:'s12',num:'12',grp:'c2',
    group:'Carousel 2',group_es:'Carrusel 2',
    title:'C2 – PCB Placement',title_es:'C2 – Colocación de PCB',
    items:[
@@ -847,7 +826,7 @@ const DATA = [
     'Detección de orientación / fiducial de PCB – correr ciclo de prueba; confirmar alineación dentro de especificación',
     'Acoplamientos de motor – inspeccionar desgaste o resbalamiento en todos los ejes'
    ]},
-  {id:'s14',num:'14',grp:'c2',
+  {id:'s13',num:'13',grp:'c2',
    group:'Carousel 2',group_es:'Carrusel 2',
    title:'C2 – Heat Staking Station',title_es:'C2 – Estación de Estacado por Calor',
    items:[
@@ -868,7 +847,7 @@ const DATA = [
     'Termopar / RTD – verificar precisión de lectura; revisar conector',
     'Muestra de calidad de estacado – inspeccionar altura/ancho; registrar resultado'
    ]},
-  {id:'s15',num:'15',grp:'c2',
+  {id:'s14',num:'14',grp:'c2',
    group:'Carousel 2',group_es:'Carrusel 2',
    title:'C2 – Laser Etch (Engraving) Station',title_es:'C2 – Estación de Grabado Láser',
    items:[
@@ -885,7 +864,7 @@ const DATA = [
     'Ductos de extracción de humos – inspeccionar por bloqueo o fugas',
     'Verificación de calidad de marca – correr grabado de prueba; inspeccionar profundidad, contraste y legibilidad'
    ]},
-  {id:'s16',num:'16',grp:'c2',
+  {id:'s15',num:'15',grp:'c2',
    group:'Carousel 2',group_es:'Carrusel 2',
    title:'C2 – PV804 Bulkhead Gluing Station',title_es:'C2 – Estación de Pegado PV804 Bulkhead',
    items:[
@@ -912,7 +891,7 @@ const DATA = [
     'Cobertura de trayectoria – correr prueba; verificar cobertura completa del perímetro del bulkhead',
     'Bandeja de goteo – limpiar; desechar material residual según procedimiento'
    ]},
-  {id:'s17',num:'17',grp:'c2',
+  {id:'s16',num:'16',grp:'c2',
    group:'Carousel 2',group_es:'Carrusel 2',
    title:'C2 – 3D Inspection Station',title_es:'C2 – Estación de Inspección 3D',
    items:[
@@ -929,7 +908,7 @@ const DATA = [
     'Software – verificar versión del programa de inspección; revisar umbrales de alarma',
     'Comunicación al controlador de línea – verificar señal de salida pasa/no pasa'
    ]},
-  {id:'s18',num:'18',grp:'c2',
+  {id:'s17',num:'17',grp:'c2',
    group:'Carousel 2',group_es:'Carrusel 2',
    title:'C2 – Unit Unloading',title_es:'C2 – Descarga de Unidad',
    items:[
@@ -956,7 +935,7 @@ const DATA = [
     'Rieles guía y topes – inspeccionar desgaste; verificar tornillería de montaje',
     'Transferencia / interfaz de banda transportadora aguas abajo – verificar alineación de transferencia'
    ]},
-  {id:'s19',num:'19',grp:'lid',
+  {id:'s18',num:'18',grp:'lid',
    group:'Lid Feeding',group_es:'Alimentación de Tapas',
    title:'Lid Feeding – Magazine Placement',title_es:'Alimentación de Tapas – Colocación de Cargador',
    items:[
@@ -983,7 +962,7 @@ const DATA = [
     'Tornillería de montaje – verificar torque de todos los pernos; inspeccionar por aflojamiento por vibración',
     'Paro de emergencia y enclavamientos de seguridad – prueba funcional'
    ]},
-  {id:'s20',num:'20',grp:'lid',
+  {id:'s19',num:'19',grp:'lid',
    group:'Lid Feeding',group_es:'Alimentación de Tapas',
    title:'Lid Feeding – Pick and Placement',title_es:'Alimentación de Tapas – Recogida y Colocación',
    items:[
@@ -1016,7 +995,7 @@ const DATA = [
     'Acoplamientos de motor – inspeccionar desgaste o resbalamiento en todos los ejes',
     'Portacables / cadena portacables – inspeccionar eslabones; remover residuos'
    ]},
-  {id:'s21',num:'21',grp:'c3',
+  {id:'s20',num:'20',grp:'c3',
    group:'Carousel 3',group_es:'Carrusel 3',
    title:'C3 – PCB Placement',title_es:'C3 – Colocación de PCB',
    items:[
@@ -1049,7 +1028,7 @@ const DATA = [
     'Acoplamientos de motor – inspeccionar desgaste o resbalamiento en todos los ejes',
     'Paro de emergencia y enclavamientos de seguridad – prueba funcional'
    ]},
-  {id:'s22',num:'22',grp:'c3',
+  {id:'s21',num:'21',grp:'c3',
    group:'Carousel 3',group_es:'Carrusel 3',
    title:'C3 – Perimeter USW (Ultrasonic Welding)',title_es:'C3 – USW Perimetral (Soldadura Ultrasónica)',
    items:[
@@ -1078,7 +1057,7 @@ const DATA = [
     'Salida de potencia del generador – verificar ajustes de amplitud y frecuencia',
     'Muestra de calidad / prueba de jalón – inspeccionar continuidad de costura; registrar resultado'
    ]},
-  {id:'s23',num:'23',grp:'c3',
+  {id:'s22',num:'22',grp:'c3',
    group:'Carousel 3',group_es:'Carrusel 3',
    title:'C3 – Bulkhead USW (Ultrasonic Welding)',title_es:'C3 – USW Bulkhead (Soldadura Ultrasónica)',
    items:[
@@ -1107,7 +1086,7 @@ const DATA = [
     'Salida de potencia del generador – verificar ajustes de amplitud y frecuencia',
     'Muestra de calidad / prueba de jalón – inspeccionar unión del bulkhead; registrar resultado'
    ]},
-  {id:'s24',num:'24',grp:'c3',
+  {id:'s23',num:'23',grp:'c3',
    group:'Carousel 3',group_es:'Carrusel 3',
    title:'C3 – 1D Label Station',title_es:'C3 – Estación de Etiqueta 1D',
    items:[
@@ -1138,7 +1117,7 @@ const DATA = [
     'Suministro de ribbon / tinta – verificar ribbon restante; reemplazar según programa',
     'Posición del aplicador de etiqueta – verificar alineación de colocación en la unidad'
    ]},
-  {id:'s25',num:'25',grp:'c3',
+  {id:'s24',num:'24',grp:'c3',
    group:'Carousel 3',group_es:'Carrusel 3',
    title:'C3 – Unloading / Labeling Station',title_es:'C3 – Estación de Descarga / Etiquetado',
    items:[
