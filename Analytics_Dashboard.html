@@ -98,7 +98,11 @@ input,select,textarea{font-size:16px !important;}
 
 /* ── SCOUT FLAGS ─────────────────────────────────────────────────────────── */
 .scout-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}
-.scout-card{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:14px;}
+.scout-card{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:14px;transition:all .15s;}
+.scout-card.clickable{cursor:pointer;}
+.scout-card.clickable:hover{border-color:var(--bdr2);background:#181d24;}
+.scout-card.active{border-color:var(--amb);background:rgba(240,165,0,.06);box-shadow:0 0 0 1px var(--amb) inset;}
+.scout-card.active .scout-card-meta{color:var(--amb);}
 .scout-card-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mut2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
 .scout-card-num{font-size:24px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
 .scout-card.has-attn .scout-card-num{color:var(--red);}
@@ -106,6 +110,10 @@ input,select,textarea{font-size:16px !important;}
 .scout-card-meta{font-size:10.5px;color:var(--mut);margin-top:4px;font-family:'IBM Plex Mono',monospace;}
 
 .flag-list{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:6px 14px;max-height:300px;overflow-y:auto;}
+.flag-list-expanded{max-height:none;}
+.flag-list-meta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mut2);margin:14px 0 6px;letter-spacing:.02em;}
+.scout-clear-btn{background:transparent;border:1px solid var(--amb);color:var(--amb);font-size:10.5px;font-family:'IBM Plex Mono',monospace;padding:4px 11px;border-radius:5px;cursor:pointer;transition:all .15s;}
+.scout-clear-btn:hover{background:rgba(240,165,0,.1);}
 .flag-row{padding:10px 0;border-bottom:1px solid var(--bdr);}
 .flag-row:last-child{border-bottom:none;}
 .flag-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:4px;flex-wrap:wrap;}
@@ -357,6 +365,7 @@ const SOURCES = [
 let allData = {};      // {sourceKey: rows[]}
 let rangeDays = 7;     // 0 = all
 let wipLineFilter = 'all';  // 'all'|'pott'|'wav'|'car'
+let scoutFilter = 'all';    // 'all' | 'scout-car' | 'scout-pott' | 'scout-wav'
 
 // ── DATE HELPERS ───────────────────────────────────────────────────────────────
 function withinRange(rowDate){
@@ -676,7 +685,7 @@ function recentFlags(rows){
     });
   });
   out.sort((a,b)=> new Date(b.when) - new Date(a.when));
-  return out.slice(0,15);
+  return out;  // No cap — caller decides how many to show
 }
 
 // ── RECENT FEED ────────────────────────────────────────────────────────────────
@@ -741,6 +750,16 @@ function render(){
       if(!btn) return;
       wipLineFilter = btn.dataset.line;
       render();
+    });
+  }
+
+  // Wire up scout card filter clicks
+  const scoutGrid = document.getElementById('scoutCardGrid');
+  if(scoutGrid){
+    scoutGrid.addEventListener('click', e => {
+      const card = e.target.closest('.scout-card.clickable');
+      if(!card) return;
+      setScoutFilter(card.dataset.key);
     });
   }
 }
@@ -1087,30 +1106,48 @@ function renderScout(scout, flags){
   const card = (key, label) => {
     const s = scout[key];
     const cls = s.attnTotal>0 ? 'has-attn' : (s.reports>0 ? 'clean' : '');
+    const isActive = scoutFilter === key;
     const meta = s.reports===0 ? 'no reports yet' : `from ${s.reports} report${s.reports!==1?'s':''}`;
+    const isClickable = s.attnTotal > 0;
     return `
-      <div class="scout-card ${cls}">
+      <div class="scout-card ${cls}${isActive?' active':''}${isClickable?' clickable':''}" data-key="${key}">
         <div class="scout-card-name">${label}</div>
         <div class="scout-card-num">${s.attnTotal}</div>
-        <div class="scout-card-meta">${meta}</div>
+        <div class="scout-card-meta">${meta}${isClickable?' · click to view':''}</div>
       </div>`;
   };
+
+  // Filter flag list based on active filter
+  const filteredFlags = scoutFilter === 'all'
+    ? flags.slice(0, 15)              // unfiltered: keep the 15-item preview
+    : flags.filter(f => f.src.key === scoutFilter);  // filtered: show ALL
+
+  const flagsLabel = scoutFilter === 'all'
+    ? (flags.length > 15 ? `Showing 15 most recent of ${flags.length} flagged items` : `${flags.length} flagged item${flags.length!==1?'s':''}`)
+    : `Showing all ${filteredFlags.length} flagged item${filteredFlags.length!==1?'s':''} for this sheet`;
+
   return `
     <div class="panel">
       <div class="panel-head">
         <h2>${t('analytics.panel.scout')}</h2>
-        <div class="panel-meta">items needing attention</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${scoutFilter !== 'all' ? `<button class="scout-clear-btn" onclick="setScoutFilter('all')">Show all sheets ✕</button>` : ''}
+          <div class="panel-meta">items needing attention</div>
+        </div>
       </div>
       <div class="panel-body">
-        <div class="scout-grid">
+        <div class="scout-grid" id="scoutCardGrid">
           ${card('scout-car', 'Carousel Scout')}
           ${card('scout-pott','Potting Scout')}
           ${card('scout-wav', 'Wave-3 Scout')}
         </div>
-        ${flags.length===0
+        ${flags.length === 0
           ? `<div class="empty" style="padding:20px;background:var(--bg);border:1px solid var(--bdr);border-radius:8px"><div class="empty-icon">✓</div>No flagged items in this range.</div>`
-          : `<div class="flag-list">
-              ${flags.map(f => `
+          : `<div class="flag-list-meta">${flagsLabel}</div>
+             <div class="flag-list ${scoutFilter !== 'all' ? 'flag-list-expanded' : ''}">
+              ${filteredFlags.length === 0
+                ? `<div class="empty" style="padding:20px;text-align:center;color:var(--mut2)"><div class="empty-icon">✓</div>No flagged items for this sheet.</div>`
+                : filteredFlags.map(f => `
                 <div class="flag-row">
                   <div class="flag-head">
                     <span class="flag-source ${f.src.key.split('-')[1]}">${escapeHtml(f.src.label)}</span>
@@ -1124,6 +1161,12 @@ function renderScout(scout, flags){
             </div>`}
       </div>
     </div>`;
+}
+
+// Filter handler — clicking a scout card filters the flag list to that sheet
+function setScoutFilter(key){
+  scoutFilter = (scoutFilter === key) ? 'all' : key;
+  render();
 }
 
 // ── Reports by Technician ───────────────────────────────────────────────────
