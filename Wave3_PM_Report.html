@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function(){
+  try {
+    const saved = localStorage.getItem('salcomp_amb_color');
+    if(saved){
+      const c = JSON.parse(saved);
+      const r = document.documentElement;
+      r.style.setProperty('--amb', c.amb);
+      r.style.setProperty('--amb-rgb', c.rgb);
+      r.style.setProperty('--amb-hover', c.hover);
+      r.style.setProperty('--amb-deep', c.deep);
+      r.style.setProperty('--amb-light', c.light);
+      r.style.setProperty('--amb2', c.amb2);
+    }
+  } catch(e){}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salcomp — Wave-3 PM Report</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+:root{
+  --bg:#0d1117;--sur:#161b22;--sur2:#1c2128;--bdr:#21262d;--bdr2:#30363d;
+  --amb:#f0a500;--amb-rgb:240,165,0;--amb-hover:#d59300;--amb-deep:#b07000;--amb-light:#fff5dc;--amb2:#ffd166;
+  --grn:#3fb950;--red:#f85149;
+  --txt:#e6edf3;--mut:#d0d7de;--mut2:#b1bac4;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-text-size-adjust:100%;}
+input,select,textarea{font-size:16px !important;}
+@media(min-width:861px){input,select,textarea{font-size:13px !important;}}
+
+/* HEADER */
+.site-header{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.site-header a.back{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:5px 11px;border-radius:6px;cursor:pointer;text-decoration:none;transition:all .15s;}
+.site-header a.back:hover{border-color:var(--amb);color:var(--amb);}
+.logo{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--amb);letter-spacing:.08em;text-transform:uppercase;}
+.hdr-right{display:flex;gap:14px;align-items:center;}
+
+/* TABS */
+.hdr-tabs{display:flex;gap:2px;background:var(--bg);border:1px solid var(--bdr);border-radius:7px;padding:3px;}
+.hdr-tab{padding:5px 12px;border-radius:5px;border:none;background:transparent;color:var(--mut);font-size:11.5px;font-family:'IBM Plex Mono',monospace;font-weight:500;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.hdr-tab:hover{color:var(--txt);}
+.hdr-tab.active{background:rgba(var(--amb-rgb), .14);color:var(--amb);}
+.tab-count{background:var(--bdr2);color:var(--mut);font-size:10px;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center;}
+.hdr-tab.active .tab-count{background:rgba(var(--amb-rgb), .25);color:var(--amb);}
+
+.lang-toggle{display:inline-flex;align-items:center;background:rgba(0,0,0,.25);border:1px solid var(--bdr);border-radius:6px;padding:2px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;cursor:pointer;}
+.lang-toggle span{padding:4px 9px;border-radius:4px;color:var(--mut2);}
+.lang-toggle span.active{background:rgba(var(--amb-rgb), .18);color:var(--amb);}
+
+/* PAGES */
+.page{display:none;}
+.page.active{display:block;}
+
+/* MAIN */
+.main{max-width:1080px;margin:0 auto;padding:24px 24px 100px;}
+.fhdr{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:18px 22px;margin-bottom:18px;}
+.ftitle{font-size:20px;font-weight:600;margin-bottom:3px;}
+.fsub{font-size:12.5px;color:var(--mut);margin-bottom:14px;}
+.meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.mf label{display:block;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--mut2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.mf input, .mf select{width:100%;background:var(--bg);border:1px solid var(--bdr2);border-radius:6px;padding:8px 11px;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;outline:none;}
+.mf input:focus, .mf select:focus{border-color:var(--amb);}
+.mf input[readonly]{color:var(--mut);background:var(--sur2);}
+
+/* SECTIONS */
+.section{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;margin-bottom:18px;overflow:hidden;}
+.section-hdr{padding:13px 20px;background:var(--sur2);border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;}
+.section-hdr h2{font-size:14px;font-weight:600;color:var(--amb);font-family:'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;}
+.section-hdr .sec-count{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mut);}
+
+/* ITEM ROW */
+.item-row{padding:11px 20px;border-bottom:1px solid var(--bdr);display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;}
+.item-row:last-child{border-bottom:none;}
+.item-row.completed{background:rgba(63,185,80,0.04);}
+.item-row.completed .item-text{text-decoration:line-through;color:var(--mut2);}
+
+.item-text{font-size:13px;line-height:1.4;}
+.item-meta{font-size:11px;color:var(--mut2);font-family:'IBM Plex Mono',monospace;margin-top:3px;}
+.item-note-input{display:block;width:100%;background:var(--bg);border:1px solid var(--bdr2);border-radius:5px;padding:6px 10px;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;font-size:12px;margin-top:6px;outline:none;}
+.item-note-input:focus{border-color:var(--amb);}
+.item-orig-note{font-size:11.5px;color:var(--mut);font-style:italic;margin-top:4px;padding:5px 10px;background:rgba(248,81,73,0.06);border-left:2px solid rgba(248,81,73,0.4);border-radius:2px;}
+
+.item-actions{display:flex;gap:6px;align-items:center;}
+.tristate{display:inline-flex;background:var(--bg);border:1px solid var(--bdr2);border-radius:6px;padding:2px;}
+.tristate button{border:none;background:transparent;color:var(--mut2);font-size:10.5px;font-family:'IBM Plex Mono',monospace;padding:5px 11px;border-radius:4px;cursor:pointer;font-weight:600;}
+.tristate button:hover{color:var(--txt);}
+.tristate button.sel-ok{background:rgba(63,185,80,0.18);color:var(--grn);}
+.tristate button.sel-attn{background:rgba(248,81,73,0.18);color:var(--red);}
+.tristate button.sel-na{background:rgba(177,186,196,0.15);color:var(--mut);}
+
+.checkbox-big{appearance:none;-webkit-appearance:none;width:24px;height:24px;border:2px solid var(--bdr2);border-radius:5px;background:var(--bg);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.checkbox-big:hover{border-color:var(--amb);}
+.checkbox-big:checked{background:var(--grn);border-color:var(--grn);}
+.checkbox-big:checked::after{content:'✓';color:#fff;font-weight:700;font-size:14px;}
+
+/* PENDING FLAGS PANEL */
+.pending-empty{padding:30px 20px;text-align:center;color:var(--mut2);font-size:13px;}
+.pending-empty .icon{font-size:30px;margin-bottom:8px;opacity:.5;}
+.pending-loading{padding:24px;text-align:center;color:var(--mut);font-size:13px;}
+.pending-loading .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--bdr2);border-top-color:var(--amb);border-radius:50%;animation:spin .8s linear infinite;margin-right:10px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pending-prompt{padding:24px;text-align:center;color:var(--mut2);font-size:13px;background:var(--bg);}
+.pending-prompt .icon{font-size:24px;margin-bottom:6px;opacity:.5;}
+
+.flag-from{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--mut2);text-transform:uppercase;letter-spacing:.05em;}
+
+/* GENERAL NOTES */
+.notes-section{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:18px 22px;margin-bottom:18px;}
+.notes-section h2{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;font-family:'IBM Plex Mono',monospace;}
+.notes-section textarea{width:100%;min-height:80px;background:var(--bg);border:1px solid var(--bdr2);border-radius:6px;padding:10px 12px;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;outline:none;resize:vertical;}
+.notes-section textarea:focus{border-color:var(--amb);}
+
+/* ACTIONS */
+.actions{position:fixed;bottom:0;left:0;right:0;background:var(--sur);border-top:1px solid var(--bdr);padding:12px 24px;display:flex;justify-content:flex-end;gap:10px;z-index:90;}
+.btn{padding:9px 18px;border-radius:7px;border:none;font-size:13px;font-family:'IBM Plex Sans',sans-serif;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-ghost{background:transparent;color:var(--mut);border:1px solid var(--bdr2);}
+.btn-ghost:hover{border-color:var(--amb);color:var(--amb);}
+.btn-primary{background:var(--amb);color:#000;}
+.btn-primary:hover{background:var(--amb-hover);}
+.btn-ok{background:var(--grn);color:#000;}
+.btn-warn{background:var(--red);color:#fff;}
+
+/* TOAST */
+.toast{position:fixed;bottom:80px;right:22px;padding:11px 18px;border-radius:7px;font-size:13px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.45);transform:translateY(70px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:999;}
+.toast.show{transform:translateY(0);opacity:1;}
+.t-ok{background:var(--grn);color:#000;}
+.t-warn{background:var(--red);color:#fff;}
+
+/* PROGRESS */
+.progress-bar{height:5px;background:var(--bdr);border-radius:3px;overflow:hidden;margin:8px 0;}
+.progress-fill{height:100%;background:var(--amb);transition:width .3s;}
+
+/* REPORTS LIST */
+.reports-main{max-width:820px;margin:0 auto;padding:24px 16px 80px;}
+.rep-toolbar{display:flex;gap:10px;margin-bottom:14px;}
+.rep-search{flex:1;background:var(--bg);border:1px solid var(--bdr2);border-radius:7px;padding:9px 13px;color:var(--txt);font-size:13px;outline:none;}
+.rep-search:focus{border-color:var(--amb);}
+.rep-refresh{background:transparent;border:1px solid var(--bdr2);color:var(--mut);padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;}
+.rep-refresh:hover{border-color:var(--amb);color:var(--amb);}
+.rep-row{background:var(--sur);border:1px solid var(--bdr);border-radius:8px;padding:14px 16px;margin-bottom:8px;cursor:pointer;}
+.rep-row:hover{border-color:var(--bdr2);background:#181d24;}
+.rep-row-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.rep-row-tech{font-size:14px;font-weight:500;}
+.rep-row-meta{font-size:11.5px;color:var(--mut);font-family:'IBM Plex Mono',monospace;}
+.rep-row-stats{display:flex;gap:14px;margin-top:6px;font-size:11.5px;color:var(--mut);font-family:'IBM Plex Mono',monospace;}
+.rep-empty{text-align:center;padding:48px 20px;color:var(--mut2);}
+
+@media(max-width:860px){
+  .site-header{padding:0 14px;height:52px;}
+  .logo{font-size:11px;}
+  .main{padding:14px 14px 100px;}
+  .meta-grid{grid-template-columns:repeat(2,1fr);}
+  .item-row{grid-template-columns:1fr;}
+  .item-actions{justify-content:flex-end;}
+  .actions{padding:10px 14px;}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="back" href="index.html">← Back</a>
+  <div class="logo">🌊 Wave-3 PM</div>
+  <div class="hdr-right">
+    <div class="hdr-tabs">
+      <button class="hdr-tab active" id="tabForm" onclick="switchTab('form')">PM Report</button>
+      <button class="hdr-tab" id="tabReports" onclick="switchTab('reports')">Reports <span class="tab-count" id="repCount">0</span></button>
+    </div>
+    <button class="lang-toggle" onclick="toggleLanguage()">
+      <span class="lang-en active">EN</span><span class="lang-es">ES</span>
+    </button>
+  </div>
+</header>
+
+<!-- ═══ FORM PAGE ═══ -->
+<div id="pageForm" class="page active">
+  <div class="main">
+
+    <div class="fhdr">
+      <div class="ftitle">Wave-3 — Weekly PM Report</div>
+      <div class="fsub">Weekly Preventive Maintenance — Wave-3 Line · Standard tasks + pending scout flags for this line</div>
+      <div class="meta-grid">
+        <div class="mf"><label>Date</label><input type="date" id="fDate"></div>
+        <div class="mf">
+          <label>Shift</label>
+          <select id="fShift">
+            <option value="">— Select —</option>
+            <option value="A">A Shift (6 AM – 2 PM)</option>
+            <option value="B">B Shift (2 PM – 10 PM)</option>
+            <option value="C">C Shift (10 PM – 6 AM)</option>
+          </select>
+        </div>
+        <div class="mf"><label>Line</label><input type="number" id="fLine" inputmode="numeric" min="1" step="1" placeholder="e.g. 1" oninput="onLineChange()"></div>
+        <div class="mf"><label>Tech Name</label><input type="text" id="techName" placeholder="Full name"></div>
+      </div>
+    </div>
+
+    <!-- PENDING FLAGS PANEL -->
+    <div class="section" id="pendingSection">
+      <div class="section-hdr">
+        <h2>⚠ Pending Items From Scout Reports</h2>
+        <div class="sec-count" id="pendingCount">enter line above</div>
+      </div>
+      <div id="pendingBody">
+        <div class="pending-prompt">
+          <div class="icon">📋</div>
+          <div>Enter the Line above to load pending scout flags for this area.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEEKLY STANDARD TASKS -->
+    <div id="weeklyTasks">
+      
+    <div class="section">
+      <div class="section-hdr">
+        <h2>Wave-3 Line</h2>
+        <div class="sec-count">22 tasks</div>
+      </div>
+        <div class="item-row" data-task="Wave-3-Line-0" data-group="Wave-3 Line">
+          <div class="item-text">Lubricate linear bearings on all pick-and-place stations</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-0','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-0','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-0','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-1" data-group="Wave-3 Line">
+          <div class="item-text">Check belt tension on conveyor and pick-and-place axes</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-1','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-1','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-1','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-2" data-group="Wave-3 Line">
+          <div class="item-text">Run E-stop and safety interlock functional test on every station</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-2','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-2','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-2','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-3" data-group="Wave-3 Line">
+          <div class="item-text">Tighten mounting hardware on all stations to spec torque</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-3','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-3','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-3','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-4" data-group="Wave-3 Line">
+          <div class="item-text">Clean optical sensor lenses (cap presence, part presence) with lint-free cloth</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-4','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-4','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-4','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-5" data-group="Wave-3 Line">
+          <div class="item-text">Inspect cap feeder bowl and track; clear any jams</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-5','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-5','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-5','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-6" data-group="Wave-3 Line">
+          <div class="item-text">Inspect sonotrode (horn) for cracks/wear on Cap USW station</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-6','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-6','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-6','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-7" data-group="Wave-3 Line">
+          <div class="item-text">Run weld pull-test sample on Cap USW; record result</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-7','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-7','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-7','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-8" data-group="Wave-3 Line">
+          <div class="item-text">Verify generator amplitude setting on Cap USW</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-8','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-8','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-8','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-9" data-group="Wave-3 Line">
+          <div class="item-text">Inspect cooling fans and heat exchanger on Cap USW</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-9','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-9','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-9','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-10" data-group="Wave-3 Line">
+          <div class="item-text">Inspect glue tank for contamination or skinning</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-10','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-10','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-10','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-11" data-group="Wave-3 Line">
+          <div class="item-text">Verify glue pump output pressure and flow rate</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-11','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-11','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-11','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-12" data-group="Wave-3 Line">
+          <div class="item-text">Clean glue dispensing nozzle / tip; inspect orifice</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-12','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-12','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-12','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-13" data-group="Wave-3 Line">
+          <div class="item-text">Run glue dispense bead inspection; confirm bond quality</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-13','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-13','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-13','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-14" data-group="Wave-3 Line">
+          <div class="item-text">Verify torque controller setpoint on Screwing Station; test calibration</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-14','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-14','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-14','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-15" data-group="Wave-3 Line">
+          <div class="item-text">Inspect screw feeder / escapement; clear any jams</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-15','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-15','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-15','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-16" data-group="Wave-3 Line">
+          <div class="item-text">Inspect bracket feeder / magazine; verify guides</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-16','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-16','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-16','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-17" data-group="Wave-3 Line">
+          <div class="item-text">Check label web / ribbon path on Label Station; verify barcode scan rate</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-17','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-17','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-17','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-18" data-group="Wave-3 Line">
+          <div class="item-text">Lubricate elevator bearings and ball-screw on Lower Return Elevator</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-18','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-18','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-18','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-19" data-group="Wave-3 Line">
+          <div class="item-text">Verify safety latch / anti-drop device on Pallet Raising Elevator</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-19','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-19','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-19','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-20" data-group="Wave-3 Line">
+          <div class="item-text">Inspect counterweight or tensioner setting on Pallet Raising Elevator</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-20','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-20','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-20','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-row" data-task="Wave-3-Line-21" data-group="Wave-3 Line">
+          <div class="item-text">Run home/end-of-travel sensor tests on all elevators and shuttles</div>
+          <div class="item-actions">
+            <div class="tristate">
+              <button data-val="ok" onclick="setTri('Wave-3-Line-21','ok')">OK</button>
+              <button data-val="attn" onclick="setTri('Wave-3-Line-21','attn')">Attn</button>
+              <button data-val="na" onclick="setTri('Wave-3-Line-21','na')">N/A</button>
+            </div>
+          </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- GENERAL NOTES -->
+    <div class="notes-section">
+      <h2>General PM Notes</h2>
+      <textarea id="generalNotes" placeholder="Anything else worth recording for this PM cycle…"></textarea>
+    </div>
+
+    <div class="notes-section">
+      <h2>Sign Off</h2>
+      <div class="meta-grid">
+        <div class="mf"><label>Tech Signature / Initials</label><input type="text" id="techSig" placeholder="JH"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-ghost" onclick="resetForm()">↺ Reset</button>
+    <button class="btn btn-ghost" onclick="window.print()">🖨 Print</button>
+    <button class="btn btn-primary" id="subBtn" onclick="submitReport()">Submit PM Report →</button>
+    <button class="btn btn-ghost" id="anotherBtn" onclick="submitAnother()" style="display:none">+ New Report</button>
+  </div>
+</div>
+
+<!-- ═══ REPORTS PAGE ═══ -->
+<div id="pageReports" class="page">
+  <div class="reports-main">
+    <h2 style="font-size:20px;font-weight:600;margin-bottom:4px;">Submitted PM Reports</h2>
+    <div style="font-size:12.5px;color:var(--mut);margin-bottom:18px;">All saved PM reports — click any row to view details</div>
+    <div class="rep-toolbar">
+      <input class="rep-search" id="repSearch" placeholder="Search by tech, date, line…" oninput="renderReports()">
+      <button class="rep-refresh" onclick="_repCache=null;renderReports()">↻ Refresh</button>
+    </div>
+    <div id="repList"><div class="pending-loading"><span class="spin"></span>Loading…</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="translations.js"></script>
+<script>
+// ═══ CONFIG ═══════════════════════════════════════════════════════════
+const SB_URL = 'https://zgxklwqtnjuhwmigbdkd.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpneGtsd3F0bmp1aHdtaWdiZGtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTcwMjUsImV4cCI6MjA5MjIzMzAyNX0.EHTVKXKr0PRoutgLnpHMAFHElvjkiBlDH1ZNXdyoxIM';
+
+const AREA = 'Wave-3';
+const SCOUT_TABLE = 'wave3_scout_reports';
+const WEEKLY_TASKS = {"Wave-3 Line": ["Lubricate linear bearings on all pick-and-place stations", "Check belt tension on conveyor and pick-and-place axes", "Run E-stop and safety interlock functional test on every station", "Tighten mounting hardware on all stations to spec torque", "Clean optical sensor lenses (cap presence, part presence) with lint-free cloth", "Inspect cap feeder bowl and track; clear any jams", "Inspect sonotrode (horn) for cracks/wear on Cap USW station", "Run weld pull-test sample on Cap USW; record result", "Verify generator amplitude setting on Cap USW", "Inspect cooling fans and heat exchanger on Cap USW", "Inspect glue tank for contamination or skinning", "Verify glue pump output pressure and flow rate", "Clean glue dispensing nozzle / tip; inspect orifice", "Run glue dispense bead inspection; confirm bond quality", "Verify torque controller setpoint on Screwing Station; test calibration", "Inspect screw feeder / escapement; clear any jams", "Inspect bracket feeder / magazine; verify guides", "Check label web / ribbon path on Label Station; verify barcode scan rate", "Lubricate elevator bearings and ball-screw on Lower Return Elevator", "Verify safety latch / anti-drop device on Pallet Raising Elevator", "Inspect counterweight or tensioner setting on Pallet Raising Elevator", "Run home/end-of-travel sensor tests on all elevators and shuttles"]};
+
+function sbHeaders(retPref){
+  const h = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+  if(retPref) h['Prefer'] = 'return=representation';
+  return h;
+}
+
+// ═══ SHA256 + PASSWORD ════════════════════════════════════════════════
+async function sha256(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+let REPORT_PW_HASH = null;
+sha256('7012').then(h => REPORT_PW_HASH = h);
+
+// ═══ STATE ═════════════════════════════════════════════════════════════
+let pendingFlags = [];        // open scout flags for current area+line
+let _repCache = null;
+let _ackCache = null;
+
+// Initialize date to today
+document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+
+// ═══ TOAST ═══════════════════════════════════════════════════════════
+function showToast(msg, cls){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${cls} show`;
+  setTimeout(() => t.className='toast', 3000);
+}
+
+// ═══ TRISTATE TOGGLE FOR WEEKLY TASKS ═════════════════════════════════
+function setTri(taskId, val){
+  const row = document.querySelector(`[data-task="${taskId}"]`);
+  if(!row) return;
+  row.dataset.state = val;
+  row.querySelectorAll('.tristate button').forEach(b => {
+    b.classList.remove('sel-ok','sel-attn','sel-na');
+    if(b.dataset.val === val){
+      b.classList.add('sel-' + val);
+    }
+  });
+  if(val === 'ok') row.classList.add('completed');
+  else row.classList.remove('completed');
+  updateProgress();
+}
+
+function updateProgress(){
+  const all = document.querySelectorAll('[data-task]');
+  let done = 0;
+  all.forEach(r => { if(r.dataset.state) done++; });
+  const pct = all.length === 0 ? 0 : Math.round(100 * done / all.length);
+  const fill = document.getElementById('progressFill');
+  if(fill) fill.style.width = pct + '%';
+  const lbl = document.getElementById('progressLbl');
+  if(lbl) lbl.textContent = `${done}/${all.length} tasks`;
+}
+
+// ═══ ACK CACHE — load all PM acknowledgments so we can filter pending list
+async function loadAcks(){
+  if(_ackCache) return _ackCache;
+  try {
+    const res = await fetch(SB_URL+`/rest/v1/pm_acknowledgments?select=source_table,source_report_id,item_text&limit=10000`, {
+      headers: sbHeaders()
+    });
+    if(!res.ok) throw new Error(await res.text());
+    _ackCache = await res.json();
+    return _ackCache;
+  } catch(e){
+    console.warn('ack load:', e);
+    return [];
+  }
+}
+
+function isAcked(acks, sourceTable, sourceReportId, itemText){
+  return acks.some(a =>
+    a.source_table === sourceTable &&
+    Number(a.source_report_id) === Number(sourceReportId) &&
+    a.item_text === itemText
+  );
+}
+
+// ═══ FETCH PENDING SCOUT FLAGS ═══════════════════════════════════════
+async function loadPendingFlags(line){
+  // Show loading state
+  document.getElementById('pendingBody').innerHTML =
+    '<div class="pending-loading"><span class="spin"></span>Loading pending items for Line ' + line + '…</div>';
+
+  try {
+    // Fetch scout reports for this area, filter by line on client side
+    const res = await fetch(SB_URL+`/rest/v1/${SCOUT_TABLE}?order=submitted_at.desc&limit=500`, {
+      headers: sbHeaders()
+    });
+    if(!res.ok) throw new Error(await res.text());
+    const reports = await res.json();
+    const acks = await loadAcks();
+
+    // Extract all flagged items, filtered by line and excluding acked ones
+    const flags = [];
+    reports.forEach(r => {
+      // Match by line — case insensitive, trimmed
+      const reportLine = String(r.line || '').trim().toLowerCase();
+      if(reportLine !== String(line).trim().toLowerCase()) return;
+      const secs = r.sections;
+      if(!Array.isArray(secs)) return;
+      secs.forEach(sec => {
+        const flagged = sec.flaggedItems;
+        if(!Array.isArray(flagged)) return;
+        flagged.forEach(fi => {
+          // Skip if already acked
+          if(isAcked(acks, SCOUT_TABLE, r.id, fi.item)) return;
+          flags.push({
+            scoutReportId: r.id,
+            scoutDate: r.date || r.submitted_at,
+            scoutTech: r.tech || 'Unknown',
+            secNum: sec.num,
+            secTitle: sec.title,
+            item: fi.item,
+            note: fi.note || '',
+          });
+        });
+      });
+    });
+
+    // Sort by section, then by scout date (newest first)
+    flags.sort((a,b) => {
+      if(a.secNum !== b.secNum) return String(a.secNum).localeCompare(String(b.secNum));
+      return new Date(b.scoutDate) - new Date(a.scoutDate);
+    });
+
+    pendingFlags = flags;
+    renderPending(line);
+  } catch(e){
+    console.error(e);
+    document.getElementById('pendingBody').innerHTML =
+      '<div class="pending-empty"><div class="icon">⚠</div>Could not load pending items: ' + (e.message||'') + '</div>';
+  }
+}
+
+function renderPending(line){
+  const body = document.getElementById('pendingBody');
+  const cnt = document.getElementById('pendingCount');
+  if(pendingFlags.length === 0){
+    body.innerHTML = `<div class="pending-empty"><div class="icon">✓</div>No pending scout flags for ${AREA} Line ${line}. All clear!</div>`;
+    cnt.textContent = '0 pending';
+    return;
+  }
+  cnt.textContent = pendingFlags.length + ' pending';
+
+  // Group by section
+  const bySection = {};
+  pendingFlags.forEach(f => {
+    const k = `${f.secNum}-${f.secTitle}`;
+    if(!bySection[k]) bySection[k] = [];
+    bySection[k].push(f);
+  });
+
+  let html = '';
+  Object.entries(bySection).forEach(([k, items]) => {
+    const [num, ...titleParts] = k.split('-');
+    const title = titleParts.join('-');
+    html += `<div style="padding:12px 20px 4px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mut2);text-transform:uppercase;letter-spacing:.06em;border-top:1px solid var(--bdr);background:var(--sur2);">§${num} ${title}</div>`;
+    items.forEach((f, i) => {
+      const id = `flag-${f.scoutReportId}-${num}-${i}`;
+      html += `
+        <div class="item-row" id="${id}">
+          <div>
+            <div class="item-text">⚠ ${escapeHtml(f.item)}</div>
+            ${f.note ? `<div class="item-orig-note">Tech note: ${escapeHtml(f.note)}</div>` : ''}
+            <div class="item-meta flag-from">From scout: ${escapeHtml(f.scoutTech)} · ${escapeHtml(f.scoutDate||'').slice(0,10)} · Report #${f.scoutReportId}</div>
+            <input type="text" class="item-note-input" placeholder="What did you do? (optional)" id="fix-${id}">
+          </div>
+          <div class="item-actions">
+            <input type="checkbox" class="checkbox-big" id="ck-${id}" onchange="toggleResolved('${id}', this)">
+          </div>
+        </div>`;
+    });
+  });
+  body.innerHTML = html;
+}
+
+function toggleResolved(id, checkbox){
+  const row = document.getElementById(id);
+  if(checkbox.checked) row.classList.add('completed');
+  else row.classList.remove('completed');
+}
+
+// ═══ LINE CHANGE TRIGGER ═══════════════════════════════════════════════
+let _lineDebounce = null;
+function onLineChange(){
+  const line = document.getElementById('fLine').value.trim();
+  clearTimeout(_lineDebounce);
+  if(!line){
+    document.getElementById('pendingBody').innerHTML =
+      '<div class="pending-prompt"><div class="icon">📋</div><div>Enter the Line above to load pending scout flags for this area.</div></div>';
+    document.getElementById('pendingCount').textContent = 'enter line above';
+    pendingFlags = [];
+    return;
+  }
+  // Debounce 600ms so we don't fire on every keystroke
+  _lineDebounce = setTimeout(() => loadPendingFlags(line), 600);
+}
+
+// ═══ ESCAPE ═════════════════════════════════════════════════════════════
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ═══ COLLECT + SUBMIT ═══════════════════════════════════════════════════
+function collectData(){
+  const weeklyTaskResults = [];
+  document.querySelectorAll('[data-task]').forEach(row => {
+    weeklyTaskResults.push({
+      id: row.dataset.task,
+      group: row.dataset.group,
+      text: row.querySelector('.item-text').textContent.trim(),
+      state: row.dataset.state || null,  // 'ok' | 'attn' | 'na' | null
+      note: (row.querySelector('.item-note-input')?.value || '').trim(),
+    });
+  });
+
+  // Resolved acknowledgments
+  const acknowledgments = [];
+  pendingFlags.forEach((f, i) => {
+    const id = `flag-${f.scoutReportId}-${f.secNum}-${i}`;
+    const ck = document.getElementById('ck-' + id);
+    if(ck && ck.checked){
+      const fixNote = (document.getElementById('fix-' + id)?.value || '').trim();
+      acknowledgments.push({
+        source_table: SCOUT_TABLE,
+        source_report_id: f.scoutReportId,
+        section_num: f.secNum,
+        section_title: f.secTitle,
+        item_text: f.item,
+        original_note: f.note,
+        area: AREA,
+        line: document.getElementById('fLine').value.trim(),
+        fix_note: fixNote,
+      });
+    }
+  });
+
+  return {
+    weeklyTaskResults,
+    acknowledgments,
+    pmReport: {
+      area: AREA,
+      line:      document.getElementById('fLine').value.trim(),
+      date:      document.getElementById('fDate').value,
+      shift:     document.getElementById('fShift').value,
+      tech_name: document.getElementById('techName').value.trim(),
+      tech_sig:  document.getElementById('techSig').value.trim(),
+      weekly_tasks: weeklyTaskResults,
+      pending_count: pendingFlags.length,
+      resolved_count: acknowledgments.length,
+      notes:     document.getElementById('generalNotes').value.trim(),
+    }
+  };
+}
+
+async function submitReport(){
+  const { pmReport, acknowledgments } = collectData();
+  const missing = [];
+  if(!pmReport.date) missing.push('Date');
+  if(!pmReport.shift) missing.push('Shift');
+  if(!pmReport.line) missing.push('Line');
+  if(!pmReport.tech_name) missing.push('Tech Name');
+  if(missing.length){
+    showToast('Please fill in: ' + missing.join(', '), 't-warn');
+    return;
+  }
+
+  const btn = document.getElementById('subBtn');
+  btn.textContent = 'Saving…';
+  btn.disabled = true;
+
+  try {
+    if(!REPORT_PW_HASH) REPORT_PW_HASH = await sha256('7012');
+    pmReport.pw_hash = REPORT_PW_HASH;
+
+    // 1. Save the PM report and get its id
+    const res = await fetch(SB_URL+'/rest/v1/pm_reports', {
+      method:'POST', headers: sbHeaders(true), body: JSON.stringify(pmReport)
+    });
+    if(!res.ok) throw new Error(await res.text());
+    const inserted = await res.json();
+    const pmReportId = inserted[0]?.id;
+
+    // 2. Save acknowledgments tied to this PM report
+    if(acknowledgments.length > 0 && pmReportId){
+      const ackPayload = acknowledgments.map(a => ({
+        ...a,
+        acknowledged_by: pmReport.tech_name,
+        pm_report_id: pmReportId,
+      }));
+      const ackRes = await fetch(SB_URL+'/rest/v1/pm_acknowledgments', {
+        method:'POST', headers: sbHeaders(), body: JSON.stringify(ackPayload)
+      });
+      if(!ackRes.ok){
+        // PM report saved but acks failed — warn but don't fail entirely
+        console.warn('Ack save failed:', await ackRes.text());
+        showToast('PM saved, but resolved items not recorded. Notify admin.', 't-warn');
+      }
+    }
+
+    btn.className = 'btn btn-ok';
+    btn.textContent = '✓ PM Report Submitted';
+    document.getElementById('anotherBtn').style.display = '';
+    _repCache = null;
+    _ackCache = null;
+    showToast(`✓ PM saved · ${acknowledgments.length} item(s) resolved`, 't-ok');
+  } catch(e){
+    btn.className = 'btn btn-primary';
+    btn.textContent = 'Submit PM Report →';
+    btn.disabled = false;
+    showToast('Could not save — ' + (e.message || 'check connection'), 't-warn');
+    console.error(e);
+  }
+}
+
+function submitAnother(){
+  if(!confirm('Start a new blank PM report?')) return;
+  resetForm();
+  const btn = document.getElementById('subBtn');
+  btn.className = 'btn btn-primary';
+  btn.textContent = 'Submit PM Report →';
+  btn.disabled = false;
+  document.getElementById('anotherBtn').style.display = 'none';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function resetForm(){
+  if(!confirm('Reset all fields?')) return;
+  document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('fShift').value = '';
+  document.getElementById('fLine').value = '';
+  document.getElementById('techName').value = '';
+  document.getElementById('techSig').value = '';
+  document.getElementById('generalNotes').value = '';
+  document.querySelectorAll('[data-task]').forEach(r => {
+    r.dataset.state = '';
+    r.classList.remove('completed');
+    r.querySelectorAll('.tristate button').forEach(b => b.classList.remove('sel-ok','sel-attn','sel-na'));
+    const ni = r.querySelector('.item-note-input'); if(ni) ni.value = '';
+  });
+  document.getElementById('pendingBody').innerHTML =
+    '<div class="pending-prompt"><div class="icon">📋</div><div>Enter the Line above to load pending scout flags for this area.</div></div>';
+  document.getElementById('pendingCount').textContent = 'enter line above';
+  pendingFlags = [];
+  updateProgress();
+}
+
+// ═══ TABS ═════════════════════════════════════════════════════════════
+function switchTab(tab){
+  const pForm = document.getElementById('pageForm');
+  const pReps = document.getElementById('pageReports');
+  const tForm = document.getElementById('tabForm');
+  const tReps = document.getElementById('tabReports');
+  if(tab === 'form'){
+    pForm.classList.add('active'); pReps.classList.remove('active');
+    tForm.classList.add('active'); tReps.classList.remove('active');
+  } else {
+    pForm.classList.remove('active'); pReps.classList.add('active');
+    tForm.classList.remove('active'); tReps.classList.add('active');
+    renderReports();
+  }
+}
+
+// ═══ REPORTS LIST ═════════════════════════════════════════════════════
+async function loadReports(){
+  if(_repCache) return _repCache;
+  try {
+    const res = await fetch(SB_URL+`/rest/v1/pm_reports?area=eq.${encodeURIComponent(AREA)}&order=submitted_at.desc&limit=500`, {
+      headers: sbHeaders()
+    });
+    if(!res.ok) throw new Error(await res.text());
+    _repCache = await res.json();
+    return _repCache;
+  } catch(e){
+    console.error(e); return [];
+  }
+}
+
+async function renderReports(){
+  const list = document.getElementById('repList');
+  const query = (document.getElementById('repSearch').value||'').toLowerCase().trim();
+  list.innerHTML = '<div class="pending-loading"><span class="spin"></span>Loading…</div>';
+  const reports = await loadReports();
+  document.getElementById('repCount').textContent = reports.length;
+  const filtered = !query ? reports : reports.filter(r => {
+    const hay = [r.tech_name, r.line, r.shift, r.date].filter(Boolean).join(' ').toLowerCase();
+    return hay.includes(query);
+  });
+  if(filtered.length === 0){
+    list.innerHTML = `<div class="rep-empty">${reports.length===0?'No PM reports submitted yet.':'No reports match.'}</div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(r => {
+    const when = r.submitted_at ? new Date(r.submitted_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '—';
+    const tasks = Array.isArray(r.weekly_tasks) ? r.weekly_tasks : [];
+    const okCount = tasks.filter(t => t.state === 'ok').length;
+    return `
+      <div class="rep-row">
+        <div class="rep-row-top">
+          <div>
+            <div class="rep-row-tech">${escapeHtml(r.tech_name||'Unknown')}</div>
+            <div class="rep-row-meta">${escapeHtml(r.date||'—')} · Shift ${escapeHtml(r.shift||'?')} · Line ${escapeHtml(r.line||'?')}</div>
+          </div>
+          <div class="rep-row-meta">${when}</div>
+        </div>
+        <div class="rep-row-stats">
+          <span>Tasks: <strong>${okCount}/${tasks.length} OK</strong></span>
+          <span>Resolved flags: <strong>${r.resolved_count||0}/${r.pending_count||0}</strong></span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ═══ INITIAL LOAD ═════════════════════════════════════════════════════
+setTimeout(() => loadReports().then(r => {
+  document.getElementById('repCount').textContent = r.length;
+}), 300);
+</script>
+
+</body>
+</html>

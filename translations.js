@@ -10,7 +10,18 @@ window.SALCOMP_I18N = {
   'app.title.suffix':      { en: 'Team',       es: 'Equipo' },
   'app.subtitle':          { en: 'Select a form to get started', es: 'Seleccione un formulario para comenzar' },
   'app.col.scout':         { en: 'Scout Checks',   es: 'Chequeos Scout' },
+  'app.col.pm':            { en: 'Weekly PM',       es: 'MP Semanal' },
   'app.col.shift':         { en: 'Shift Reports',  es: 'Reportes de Turno' },
+
+  'card.carousel.pm.label': { en: 'Carousel', es: 'Carrusel' },
+  'card.carousel.pm.title': { en: 'Carousel PM Report', es: 'Reporte MP Carrusel' },
+  'card.carousel.pm.desc':  { en: '5 sections · 32 weekly tasks + pending flags', es: '5 secciones · 32 tareas semanales + banderas pendientes' },
+  'card.potting.pm.label':  { en: 'Potting', es: 'Encapsulado' },
+  'card.potting.pm.title':  { en: 'Potting PM Report', es: 'Reporte MP Encapsulado' },
+  'card.potting.pm.desc':   { en: 'Automation + Plumbing · 22 weekly tasks', es: 'Automatización + Plomería · 22 tareas semanales' },
+  'card.wave3.pm.label':    { en: 'Wave-3', es: 'Wave-3' },
+  'card.wave3.pm.title':    { en: 'Wave-3 PM Report', es: 'Reporte MP Wave-3' },
+  'card.wave3.pm.desc':     { en: '22 weekly tasks + pending flags', es: '22 tareas semanales + banderas pendientes' },
 
   'card.carousel.scout.label':  { en: 'Carousel',  es: 'Carrusel' },
   'card.carousel.scout.title':  { en: 'Carousel Scout Check Sheet', es: 'Hoja de Inspección Carrusel' },
@@ -106,10 +117,13 @@ window.SALCOMP_I18N = {
   'shift.hours_over':       { en: '# Hours Over Target', es: '# Horas sobre Meta' },
 
   // ── WIP TIMELINE ───────────────────────────────────────────────────────
-  'wip.timeline.cart':     { en: 'WIP Remaining (24hr · Cart ct)', es: 'WIP Restante (24hr · cuenta de carros)' },
-  'wip.timeline.trolley':  { en: 'WIP Remaining (24hr · Trolley ct)', es: 'WIP Restante (24hr · cuenta de trolleys)' },
+  'wip.timeline.cart':     { en: 'WIP Remaining (Cart count)', es: 'WIP Restante (cuenta de carros)' },
+  'wip.timeline.trolley':  { en: 'WIP Remaining (Trolley count)', es: 'WIP Restante (cuenta de trolleys)' },
   'wip.timeline.am':       { en: 'AM · 00–11', es: 'AM · 00–11' },
   'wip.timeline.pm':       { en: 'PM · 12–23', es: 'PM · 12–23' },
+  'wip.bucket.6am':        { en: '6 AM', es: '6 AM' },
+  'wip.bucket.2pm':        { en: '2 PM', es: '2 PM' },
+  'wip.bucket.10pm':       { en: '10 PM', es: '10 PM' },
 
   // ── SCRAP ──────────────────────────────────────────────────────────────
   'scrap.qty':             { en: 'Scrap Qty', es: 'Cant. Desperdicio' },
@@ -224,8 +238,8 @@ window.SALCOMP_I18N = {
   'analytics.panel.feed':       { en: 'Recent Submissions', es: 'Envíos Recientes' },
   'analytics.panel.uph':        { en: '24-Hour Production by Line (UPH)',
                                   es: 'Producción 24 Horas por Línea (UPH)' },
-  'analytics.uph.subtitle':     { en: 'units per hour, mapped from shift production reports',
-                                  es: 'unidades por hora, calculado de reportes de turno' },
+  'analytics.uph.subtitle':     { en: 'units per hour, from shift reports submitted in the last 24 hours',
+                                  es: 'unidades por hora, de reportes enviados en las últimas 24 horas' },
   'analytics.uph.line':         { en: 'Line', es: 'Línea' },
   'analytics.uph.unknown_line': { en: 'Unknown Line', es: 'Línea Desconocida' },
   'analytics.uph.reports_short': { en: 'rpts', es: 'rpts' },

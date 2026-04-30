@@ -112,14 +112,15 @@ body::before{
 }
 .date-dot{width:6px;height:6px;border-radius:50%;background:var(--grn);animation:pulse 2s infinite;}
 
-/* TWO-COLUMN LAYOUT */
+/* THREE-COLUMN LAYOUT */
 .cols{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1fr 1fr 1fr;
   gap:14px;
   margin-bottom:14px;
   align-items:stretch;
 }
+.col-label.red{color:#ff5252;}
 
 /* ANALYTICS CARD ROW — full width below the grid */
 .analytics-row{margin-bottom:24px;animation:fadeUp .6s .4s ease both;}
@@ -170,6 +171,7 @@ body::before{
 .card.blue::before{background:var(--blu);}
 .card.purple::before{background:var(--pur);}
 .card.cyan::before{background:var(--cyn);}
+.card.red::before{background:#ff5252;}
 
 .card:hover{
   transform:translateX(4px);
@@ -181,6 +183,7 @@ body::before{
 .card.blue:hover{border-color:rgba(42,127,255,.3);}
 .card.purple:hover{border-color:rgba(160,108,255,.3);}
 .card.cyan:hover{border-color:rgba(57,197,207,.3);}
+.card.red:hover{border-color:rgba(255,82,82,.35);}
 
 /* ICONS */
 .card-icon{
@@ -361,6 +364,42 @@ body::before{
           <div class="card-label" data-i18n="card.wave3.scout.label">Wave-3</div>
           <div class="card-title" data-i18n="card.wave3.scout.title">Wave-3 Scout Check Sheet</div>
           <div class="card-desc" data-i18n="card.wave3.scout.desc">11 stations · 97 check points</div>
+        </div>
+        <div class="card-arrow">→</div>
+      </a>
+
+    </div>
+
+    <!-- ── MIDDLE COLUMN: PM REPORTS ──────────────────────── -->
+    <div class="col">
+      <div class="col-label red" data-i18n="app.col.pm">Weekly PM</div>
+
+      <a class="card red" href="Carousel_PM_Report.html">
+        <div class="card-icon">🔧</div>
+        <div class="card-body">
+          <div class="card-label" data-i18n="card.carousel.pm.label">Carousel</div>
+          <div class="card-title" data-i18n="card.carousel.pm.title">Carousel PM Report</div>
+          <div class="card-desc" data-i18n="card.carousel.pm.desc">5 sections · 32 weekly tasks + pending flags</div>
+        </div>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a class="card red" href="Potting_PM_Report.html">
+        <div class="card-icon">🔧</div>
+        <div class="card-body">
+          <div class="card-label" data-i18n="card.potting.pm.label">Potting</div>
+          <div class="card-title" data-i18n="card.potting.pm.title">Potting PM Report</div>
+          <div class="card-desc" data-i18n="card.potting.pm.desc">Automation + Plumbing · 22 weekly tasks</div>
+        </div>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a class="card red" href="Wave3_PM_Report.html">
+        <div class="card-icon">🔧</div>
+        <div class="card-body">
+          <div class="card-label" data-i18n="card.wave3.pm.label">Wave-3</div>
+          <div class="card-title" data-i18n="card.wave3.pm.title">Wave-3 PM Report</div>
+          <div class="card-desc" data-i18n="card.wave3.pm.desc">22 weekly tasks + pending flags</div>
         </div>
         <div class="card-arrow">→</div>
       </a>

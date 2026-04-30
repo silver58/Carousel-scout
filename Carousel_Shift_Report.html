@@ -90,6 +90,16 @@ input[type=date]{color-scheme:dark;}
 
 /* WIP — 24hr hourly timeline */
 .wip-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;}
+/* WIP BUCKETS — 3 fixed time slots */
+.wip-buckets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.wip-bucket{background:var(--bg);border:1px solid var(--bdr2);border-radius:7px;padding:10px 12px;}
+.wip-bucket label{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mut2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.wip-bucket input{width:100%;background:var(--sur);border:1px solid var(--bdr2);border-radius:5px;padding:9px 11px;color:var(--txt);font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;text-align:center;outline:none;}
+.wip-bucket input:focus{border-color:var(--amb);}
+@media(max-width:700px){
+  .wip-buckets{grid-template-columns:1fr;}
+}
+
 .wip-cell{display:flex;flex-direction:column;align-items:center;gap:2px;}
 .wip-cell label{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--mut2);letter-spacing:.04em;}
 .wip-cell input{width:100%;background:var(--bg);border:1px solid var(--bdr2);border-radius:4px;padding:5px 2px;color:var(--txt);font-size:12px;font-family:'IBM Plex Mono',monospace;outline:none;text-align:center;transition:border-color .15s;}
@@ -262,7 +272,7 @@ input,select,textarea{font-size:16px !important;}
             <option value="C">C Shift</option>
           </select>
         </div>
-        <div class="field"><label data-i18n="field.line">Line</label><input type="text" id="fLine" placeholder="e.g. 1"></div>
+        <div class="field"><label data-i18n="field.line">Line</label><input type="number" id="fLine" inputmode="numeric" min="1" step="1" placeholder="e.g. 1"></div>
         <div class="field"><label data-i18n="field.machine">Machine</label><input type="text" id="fMachine" placeholder="e.g. Carousel"></div>
       </div>
       <div class="fg fg-3">
@@ -307,73 +317,28 @@ input,select,textarea{font-size:16px !important;}
     </div>
   </div>
 
-  <!-- DOWNTIME -->
-  <div class="card">
-    <div class="card-head"><h2 data-i18n="shift.section.downtime">Down Time (mins) — If no WIP write NW</h2></div>
-    <div class="card-body">
-      <table class="hr-table" style="margin-bottom:12px">
-        <thead>
-          <tr>
-            <th>1 Hr</th><th>2 Hr</th><th>3 Hr</th><th>4 Hr</th>
-            <th>5 Hr</th><th>6 Hr</th><th>7 Hr</th><th>8 Hr</th>
-            <th style="color:var(--amb)">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><input type="text" id="d1" placeholder="NW" oninput="calcTotal('dt')"></td>
-            <td><input type="text" id="d2" placeholder="NW" oninput="calcTotal('dt')"></td>
-            <td><input type="text" id="d3" placeholder="NW" oninput="calcTotal('dt')"></td>
-            <td><input type="text" id="d4" placeholder="NW" oninput="calcTotal('dt')"></td>
-            <td><input type="text" id="d5" placeholder="NW" oninput="calcTotal('dt')"></td>
-            <td><input type="text" id="d6" placeholder="NW" oninput="calcTotal('dt')"></td>
-            <td><input type="text" id="d7" placeholder="NW" oninput="calcTotal('dt')"></td>
-            <td><input type="text" id="d8" placeholder="NW" oninput="calcTotal('dt')"></td>
-            <td class="total-cell"><input type="text" id="dt-total" readonly placeholder="0"></td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="field">
-        <label data-i18n="shift.hours_over"># Hours Over Target</label>
-        <input type="text" id="fHoursOverTarget" placeholder="e.g. 0.5">
-      </div>
-    </div>
-  </div>
-
+  
   <!-- WIP & SCRAP -->
   <div class="card">
     <div class="card-head"><h2 data-i18n="shift.section.wip">WIP / Scrap</h2></div>
     <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
       <div>
-        <div class="sdiv"><span data-i18n="wip.timeline.trolley">WIP Remaining (24hr · Trolley ct)</span></div>
-        <div class="wip-grid">
-          <div class="wip-row-label" data-i18n="wip.timeline.am">AM · 00–11</div>
-          <div class="wip-cell"><label>00</label><input type="text" id="wip-00" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>01</label><input type="text" id="wip-01" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>02</label><input type="text" id="wip-02" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>03</label><input type="text" id="wip-03" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>04</label><input type="text" id="wip-04" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>05</label><input type="text" id="wip-05" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>06</label><input type="text" id="wip-06" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>07</label><input type="text" id="wip-07" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>08</label><input type="text" id="wip-08" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>09</label><input type="text" id="wip-09" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>10</label><input type="text" id="wip-10" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>11</label><input type="text" id="wip-11" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-row-label" data-i18n="wip.timeline.pm">PM · 12–23</div>
-          <div class="wip-cell"><label>12</label><input type="text" id="wip-12" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>13</label><input type="text" id="wip-13" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>14</label><input type="text" id="wip-14" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>15</label><input type="text" id="wip-15" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>16</label><input type="text" id="wip-16" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>17</label><input type="text" id="wip-17" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>18</label><input type="text" id="wip-18" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>19</label><input type="text" id="wip-19" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>20</label><input type="text" id="wip-20" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>21</label><input type="text" id="wip-21" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>22</label><input type="text" id="wip-22" inputmode="numeric" placeholder="—"></div>
-          <div class="wip-cell"><label>23</label><input type="text" id="wip-23" inputmode="numeric" placeholder="—"></div>
+        <div class="sdiv"><span data-i18n="wip.timeline.trolley">WIP Remaining (Trolley count)</span></div>
+        <div class="wip-buckets">
+          <div class="wip-bucket">
+            <label data-i18n="wip.bucket.6am">6 AM</label>
+            <input type="number" id="wip-6am" inputmode="numeric" min="0" step="1" placeholder="0">
+          </div>
+          <div class="wip-bucket">
+            <label data-i18n="wip.bucket.2pm">2 PM</label>
+            <input type="number" id="wip-2pm" inputmode="numeric" min="0" step="1" placeholder="0">
+          </div>
+          <div class="wip-bucket">
+            <label data-i18n="wip.bucket.10pm">10 PM</label>
+            <input type="number" id="wip-10pm" inputmode="numeric" min="0" step="1" placeholder="0">
+          </div>
         </div>
+      </div>
       </div>
       <div>
         <div class="sdiv"><span data-i18n="scrap.qty">Scrap Qty</span></div>
@@ -542,6 +507,38 @@ input,select,textarea{font-size:16px !important;}
     </div>
   </div>
 
+  <!-- DOWNTIME -->
+  <div class="card">
+    <div class="card-head"><h2 data-i18n="shift.section.downtime">Down Time (mins) — If no WIP write NW</h2></div>
+    <div class="card-body">
+      <table class="hr-table" style="margin-bottom:12px">
+        <thead>
+          <tr>
+            <th>1 Hr</th><th>2 Hr</th><th>3 Hr</th><th>4 Hr</th>
+            <th>5 Hr</th><th>6 Hr</th><th>7 Hr</th><th>8 Hr</th>
+            <th style="color:var(--amb)">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" id="d1" placeholder="NW" oninput="calcTotal('dt')"></td>
+            <td><input type="text" id="d2" placeholder="NW" oninput="calcTotal('dt')"></td>
+            <td><input type="text" id="d3" placeholder="NW" oninput="calcTotal('dt')"></td>
+            <td><input type="text" id="d4" placeholder="NW" oninput="calcTotal('dt')"></td>
+            <td><input type="text" id="d5" placeholder="NW" oninput="calcTotal('dt')"></td>
+            <td><input type="text" id="d6" placeholder="NW" oninput="calcTotal('dt')"></td>
+            <td><input type="text" id="d7" placeholder="NW" oninput="calcTotal('dt')"></td>
+            <td><input type="text" id="d8" placeholder="NW" oninput="calcTotal('dt')"></td>
+            <td class="total-cell"><input type="text" id="dt-total" readonly placeholder="0"></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="field">
+        <label data-i18n="shift.hours_over"># Hours Over Target</label>
+        <input type="text" id="fHoursOverTarget" placeholder="e.g. 0.5">
+      </div>
+    </div>
+  </div>
   <!-- SIGN OFF -->
   <div class="card">
     <div class="card-head"><h2 data-i18n="shift.section.signoff">Sign Off</h2></div>
@@ -694,12 +691,11 @@ function collectData(){
     downtime_total:       document.getElementById('dt-total').value,
     hours_over_target:    document.getElementById('fHoursOverTarget').value,
     wip_hourly:         (() => {
-      const arr = [];
-      for(let h=0; h<24; h++){
-        const el = document.getElementById('wip-' + String(h).padStart(2,'0'));
-        arr.push(el ? el.value : '');
-      }
-      return arr;
+      const v6  = document.getElementById('wip-6am').value;
+      const v14 = document.getElementById('wip-2pm').value;
+      const v22 = document.getElementById('wip-10pm').value;
+      // Store as 3-slot array [6am, 2pm, 10pm]
+      return [v6, v14, v22];
     })(),
     scrap_base:           document.getElementById('scrapBase').value,
     scrap_lid:            document.getElementById('scrapLid').value,
@@ -990,12 +986,10 @@ function renderRepDetails(r){
   }
   // WIP hourly
   if(Array.isArray(r.wip_hourly) && r.wip_hourly.some(v => v)){
-    html += `<div class="rep-det-section"><div class="rep-det-section-title">WIP Remaining (24h)</div>
-      <div class="rep-prod-row" style="grid-template-columns:repeat(12,1fr)">
-        ${r.wip_hourly.slice(0,12).map((v,i) => `<div class="rep-prod-cell"><span class="lbl">${String(i).padStart(2,'0')}</span>${escRep(v||'—')}</div>`).join('')}
-      </div>
-      <div class="rep-prod-row" style="grid-template-columns:repeat(12,1fr);margin-top:4px">
-        ${r.wip_hourly.slice(12,24).map((v,i) => `<div class="rep-prod-cell"><span class="lbl">${String(i+12).padStart(2,'0')}</span>${escRep(v||'—')}</div>`).join('')}
+    const buckets = ['6 AM','2 PM','10 PM'];
+    html += `<div class="rep-det-section"><div class="rep-det-section-title">WIP Remaining</div>
+      <div class="rep-prod-row" style="grid-template-columns:repeat(3,1fr)">
+        ${r.wip_hourly.slice(0,3).map((v,i) => `<div class="rep-prod-cell"><span class="lbl">${buckets[i]}</span>${escRep(v||'—')}</div>`).join('')}
       </div></div>`;
   }
   // Major downtime events
@@ -1083,7 +1077,8 @@ function printReport(id){
   }
   // WIP hourly
   if(Array.isArray(r.wip_hourly) && r.wip_hourly.some(v => v)){
-    body += `<h3>WIP Remaining (24hr)</h3><table class="wip-table"><tr>${r.wip_hourly.slice(0,12).map((v,i) => `<th>${String(i).padStart(2,'0')}</th>`).join('')}</tr><tr>${r.wip_hourly.slice(0,12).map(v => `<td>${escape(v||'—')}</td>`).join('')}</tr><tr>${r.wip_hourly.slice(12,24).map((v,i) => `<th>${String(i+12).padStart(2,'0')}</th>`).join('')}</tr><tr>${r.wip_hourly.slice(12,24).map(v => `<td>${escape(v||'—')}</td>`).join('')}</tr></table>`;
+    const buckets = ['6 AM','2 PM','10 PM'];
+    body += `<h3>WIP Remaining</h3><table class="wip-table"><tr>${buckets.map(b => `<th>${b}</th>`).join('')}</tr><tr>${r.wip_hourly.slice(0,3).map(v => `<td>${escape(v||'—')}</td>`).join('')}</tr></table>`;
   }
   // Major downtime events
   if(Array.isArray(r.downtime_events) && r.downtime_events.length > 0){
