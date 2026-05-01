@@ -747,18 +747,19 @@ sha256('7012').then(h => { REPORT_PW_HASH = h; });
 // ── SUBMIT ─────────────────────────────────────────────────────────────────────
 async function submitReport(){
   const data = collectData();
-  const missing = [];
-  if(!data.date) missing.push('Date');
-  if(!data.shift) missing.push('Shift');
-  if(!data.tech_name) missing.push('Tech Name');
-  if(!data.line || String(data.line).trim()==='') missing.push('Line');
-  // UPH = production_total (units per hour for the shift)
-  if(!data.production_total || String(data.production_total).trim()==='' || isNaN(parseFloat(data.production_total))) missing.push('UPH (production total)');
-  // WIP buckets — at least one of the 3 buckets must have a value
-  if(!Array.isArray(data.wip_hourly) || !data.wip_hourly.some(v => v !== '' && v !== null && v !== undefined && !isNaN(parseFloat(v)))) missing.push('WIP Remaining (select a time slot and enter qty)');
-  if(missing.length){
-    showToast('Please fill in: ' + missing.join(', '), 't-warn');
-    return;  // Button NOT disabled here — still clickable after fixing
+  if(!editingReportId){
+    const missing = [];
+    if(!data.date) missing.push('Date');
+    if(!data.shift) missing.push('Shift');
+    if(!data.tech_name) missing.push('Tech Name');
+    if(!data.line || String(data.line).trim()==='') missing.push('Line');
+    if(!data.production_total || String(data.production_total).trim()==='' || isNaN(parseFloat(data.production_total))) missing.push('UPH (production total)');
+    if(!Array.isArray(data.wip_hourly) || !data.wip_hourly.some(v => v !== '' && v !== null && v !== undefined && !isNaN(parseFloat(v)))) missing.push('WIP Remaining (select a time slot and enter qty)');
+    if(missing.length){
+      showToast('Please fill in: ' + missing.join(', '), 't-warn');
+      alert('Please fill in: ' + missing.join(', '));
+      return;
+    }
   }
   const btn = document.getElementById('subBtn');
   btn.textContent = 'Saving…';
@@ -807,6 +808,7 @@ async function submitReport(){
     btn.textContent = 'Submit Report →';
     btn.disabled = false;  // re-enable on error
     showToast('Could not save — ' + (e.message || 'check your connection'), 't-warn');
+    alert('Save failed: ' + (e.message || 'check your connection'));
     console.error('Submit failed:', e);
   }
 }
