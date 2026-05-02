@@ -1023,7 +1023,10 @@ function renderDowntime(dt, causes){
     <div class="panel">
       <div class="panel-head">
         <h2>${t('analytics.panel.downtime')}</h2>
-        <div class="panel-meta">${causes.length} event${causes.length!==1?'s':''} ≥1 min</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <a class="flags-review-btn" href="Downtime_Events.html">${t('analytics.downtime.button') || 'Open full review →'}</a>
+          <div class="panel-meta">${causes.length} event${causes.length!==1?'s':''} ≥1 min</div>
+        </div>
       </div>
       <div class="panel-body">
         ${hasData ? `

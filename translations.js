@@ -274,6 +274,19 @@ window.SALCOMP_I18N = {
   // Analytics dashboard "Open Flags Review" button
   'analytics.flags.button':     { en: 'Open full review →',
                                   es: 'Abrir revisión completa →' },
+  'analytics.downtime.button':  { en: 'Open full review →',
+                                  es: 'Abrir revisión completa →' },
+
+  // Downtime Events Review page
+  'downtime.title':             { en: 'Downtime Events Review',
+                                  es: 'Revisión de Eventos de Paro' },
+  'downtime.subtitle':          { en: 'All major downtime events submitted in shift reports, grouped by area and production line.',
+                                  es: 'Todos los eventos de paro mayores enviados en reportes de turno, agrupados por área y línea.' },
+  'downtime.show':              { en: 'Show:', es: 'Mostrar:' },
+  'downtime.all':               { en: 'All Areas', es: 'Todas las Áreas' },
+  'downtime.car':               { en: 'Carousel', es: 'Carrusel' },
+  'downtime.pott':              { en: 'Potting', es: 'Encapsulado' },
+  'downtime.wav':               { en: 'Wave-3', es: 'Wave-3' },
 
   // ── LANGUAGE TOGGLE ────────────────────────────────────────────────────
   'lang.label':            { en: 'EN', es: 'EN' },

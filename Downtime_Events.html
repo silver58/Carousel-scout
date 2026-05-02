@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function(){
+  try {
+    const saved = localStorage.getItem('salcomp_amb_color');
+    if(saved){
+      const c = JSON.parse(saved);
+      const r = document.documentElement;
+      r.style.setProperty('--amb', c.amb);
+      r.style.setProperty('--amb-rgb', c.rgb);
+      r.style.setProperty('--amb-hover', c.hover);
+      r.style.setProperty('--amb-deep', c.deep);
+      r.style.setProperty('--amb-light', c.light);
+      r.style.setProperty('--amb2', c.amb2);
+    }
+  } catch(e){}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salcomp — Downtime Events Review</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+:root{
+  --bg:#0d1117;--sur:#161b22;--sur2:#1c2128;--bdr:#21262d;--bdr2:#30363d;
+  --amb:#f0a500;--amb-rgb:240,165,0;--amb-hover:#d59300;--amb-deep:#b07000;--amb-light:#fff5dc;--amb2:#ffd166;
+  --grn:#3fb950;--red:#f85149;--blu:#388bfd;--pur:#a371f7;
+  --txt:#e6edf3;--mut:#d0d7de;--mut2:#b1bac4;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-text-size-adjust:100%;}
+input,select,textarea{font-size:16px !important;}
+@media(min-width:861px){input,select,textarea{font-size:13px !important;}}
+
+.site-header{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.site-header a.back{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:5px 11px;border-radius:6px;cursor:pointer;text-decoration:none;transition:all .15s;flex-shrink:0;}
+.site-header a.back:hover{border-color:var(--amb);color:var(--amb);}
+.logo{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--red);letter-spacing:.08em;text-transform:uppercase;}
+.hdr-right{display:flex;gap:14px;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mut);}
+
+.lang-toggle{display:inline-flex;align-items:center;background:rgba(0,0,0,.25);border:1px solid var(--bdr);border-radius:6px;padding:2px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.04em;cursor:pointer;user-select:none;flex-shrink:0;}
+.lang-toggle span{padding:4px 9px;border-radius:4px;color:var(--mut2);transition:all .15s;}
+.lang-toggle span.active{background:rgba(var(--amb-rgb), .18);color:var(--amb);}
+
+.main{max-width:1200px;margin:0 auto;padding:24px 28px 60px;}
+.page-title{font-size:22px;font-weight:600;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--mut);margin-bottom:20px;}
+
+.range-row{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
+.range-pills{display:inline-flex;gap:4px;background:var(--sur);border:1px solid var(--bdr);border-radius:8px;padding:4px;}
+.rpill{padding:6px 16px;border-radius:5px;border:none;background:transparent;color:var(--mut);font-size:12px;font-family:'IBM Plex Mono',monospace;font-weight:500;cursor:pointer;transition:all .15s;}
+.rpill:hover{color:var(--txt);}
+.rpill.active{background:rgba(var(--amb-rgb), .12);color:var(--amb);}
+.range-meta{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--mut2);}
+.refresh-btn{background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .15s;margin-left:auto;}
+.refresh-btn:hover{border-color:var(--amb);color:var(--amb);}
+
+.area-filter-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.area-filter-row > span{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--mut2);text-transform:uppercase;letter-spacing:.08em;}
+.area-pills{display:inline-flex;gap:3px;background:var(--sur);border:1px solid var(--bdr);border-radius:6px;padding:3px;flex-wrap:wrap;}
+.apill{padding:5px 14px;border-radius:4px;border:none;background:transparent;color:var(--mut);font-size:11.5px;font-family:'IBM Plex Mono',monospace;font-weight:500;cursor:pointer;transition:all .15s;}
+.apill:hover{color:var(--txt);}
+.apill.active{background:rgba(var(--amb-rgb), .15);color:var(--amb);}
+.apill .count{margin-left:6px;background:var(--bdr2);color:var(--mut);font-size:10px;padding:1px 6px;border-radius:9px;}
+.apill.active .count{background:rgba(var(--amb-rgb), .28);color:var(--amb);}
+
+/* KPI strip */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+.kpi-card{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:16px 18px;}
+.kpi-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mut2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.kpi-val{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:var(--red);line-height:1;}
+.kpi-sub{font-size:10.5px;color:var(--mut);margin-top:4px;font-family:'IBM Plex Mono',monospace;}
+@media(max-width:700px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
+
+/* LOADING */
+.loading{padding:60px 20px;text-align:center;color:var(--mut);font-size:14px;}
+.loading .spin{display:inline-block;width:18px;height:18px;border:2px solid var(--bdr2);border-top-color:var(--amb);border-radius:50%;animation:spin .8s linear infinite;margin-right:10px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* AREA SECTION */
+.area-section{margin-bottom:28px;}
+.area-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--red);}
+.area-hdr h2{font-size:17px;font-weight:600;color:var(--txt);}
+.area-hdr .area-count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mut);}
+
+/* LINE GROUP */
+.line-group{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;margin-bottom:12px;overflow:hidden;}
+.line-hdr{padding:11px 18px;background:var(--sur2);border-bottom:1px solid var(--bdr);display:flex;align-items:baseline;justify-content:space-between;cursor:pointer;transition:background .12s;user-select:none;}
+.line-hdr:hover{background:#222831;}
+.line-hdr-name{font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;letter-spacing:.04em;color:var(--txt);display:inline-flex;align-items:center;gap:8px;}
+.line-hdr-toggle{color:var(--mut2);font-size:11px;transition:transform .2s;display:inline-block;}
+.line-group.collapsed .line-hdr-toggle{transform:rotate(-90deg);}
+.line-hdr-meta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mut);}
+.line-hdr-meta .red{color:var(--red);font-weight:600;}
+.line-body{padding:0;}
+.line-group.collapsed .line-body{display:none;}
+
+/* DOWNTIME EVENT ROW */
+.dt-row{padding:12px 18px;border-bottom:1px solid var(--bdr);display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;}
+.dt-row:last-child{border-bottom:none;}
+.dt-row:hover{background:rgba(255,255,255,.015);}
+.dt-mins-badge{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--red);background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);border-radius:6px;padding:6px 10px;text-align:center;min-width:70px;}
+.dt-mins-badge .lbl{display:block;font-size:9px;color:var(--mut2);font-weight:500;letter-spacing:.04em;margin-top:1px;}
+.dt-content{min-width:0;}
+.dt-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:5px;flex-wrap:wrap;}
+.dt-time{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mut);font-weight:600;}
+.dt-meta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mut2);}
+.dt-problem{font-size:13px;color:var(--txt);line-height:1.4;margin-bottom:5px;}
+.dt-action{font-size:11.5px;color:var(--mut);line-height:1.45;padding:5px 10px;background:rgba(63,185,80,.06);border-left:2px solid rgba(63,185,80,.4);border-radius:2px;}
+.dt-action::before{content:'Action: ';color:var(--grn);font-weight:600;}
+.dt-no-action{font-size:11px;color:var(--mut2);font-style:italic;}
+
+.empty{padding:48px 20px;text-align:center;color:var(--mut2);font-size:13px;background:var(--sur);border:1px solid var(--bdr);border-radius:10px;}
+.empty-icon{font-size:32px;margin-bottom:10px;opacity:.5;}
+
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px;}
+
+@media(max-width:860px){
+  .site-header{padding:0 14px;height:52px;}
+  .logo{font-size:11px;}
+  .main{padding:14px 14px 40px;}
+  .page-title{font-size:18px;}
+  .range-pills{flex:1;}
+  .rpill{flex:1;text-align:center;padding:7px 4px;}
+  .refresh-btn{margin-left:0;}
+  .dt-row{grid-template-columns:1fr;gap:8px;}
+  .dt-mins-badge{justify-self:start;min-width:80px;}
+  .line-hdr{padding:10px 12px;}
+  .dt-row{padding:10px 12px;}
+  .dt-head{flex-direction:column;gap:2px;}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="back" href="Analytics_Dashboard.html"><span data-i18n="common.back">← Back</span></a>
+  <div class="logo">⚠ Downtime Events Review</div>
+  <button class="lang-toggle" onclick="toggleLanguage()" title="Switch language / Cambiar idioma">
+    <span class="lang-en active">EN</span><span class="lang-es">ES</span>
+  </button>
+</header>
+
+<main class="main">
+
+  <div class="page-title" data-i18n="downtime.title">Downtime Events Review</div>
+  <div class="page-sub" data-i18n="downtime.subtitle">All major downtime events submitted in shift reports, grouped by area and production line.</div>
+
+  <div class="range-row">
+    <div class="range-pills" id="rangePills">
+      <button class="rpill active" data-days="7" data-i18n="analytics.range.7">7 day</button>
+      <button class="rpill" data-days="30" data-i18n="analytics.range.30">30 day</button>
+      <button class="rpill" data-days="90" data-i18n="analytics.range.90">90 day</button>
+      <button class="rpill" data-days="0" data-i18n="analytics.range.all">All time</button>
+    </div>
+    <div class="range-meta" id="rangeMeta"></div>
+    <button class="refresh-btn" onclick="loadAll(true)">↻ <span data-i18n="common.refresh">Refresh</span></button>
+  </div>
+
+  <div class="area-filter-row">
+    <span data-i18n="downtime.show">Show:</span>
+    <div class="area-pills" id="areaPills">
+      <button class="apill active" data-area="all"><span data-i18n="downtime.all">All Areas</span><span class="count" id="cnt-all">0</span></button>
+      <button class="apill" data-area="Carousel"><span data-i18n="downtime.car">Carousel</span><span class="count" id="cnt-car">0</span></button>
+      <button class="apill" data-area="Potting"><span data-i18n="downtime.pott">Potting</span><span class="count" id="cnt-pott">0</span></button>
+      <button class="apill" data-area="Wave-3"><span data-i18n="downtime.wav">Wave-3</span><span class="count" id="cnt-wav">0</span></button>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Events</div>
+      <div class="kpi-val" id="kpi-events">0</div>
+      <div class="kpi-sub" id="kpi-events-sub">in selected range</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Mins Lost</div>
+      <div class="kpi-val" id="kpi-mins">0</div>
+      <div class="kpi-sub" id="kpi-mins-sub">across all events</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg Event Length</div>
+      <div class="kpi-val" id="kpi-avg">0</div>
+      <div class="kpi-sub">minutes per event</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Longest Event</div>
+      <div class="kpi-val" id="kpi-max">0</div>
+      <div class="kpi-sub" id="kpi-max-sub">minutes</div>
+    </div>
+  </div>
+
+  <div id="content">
+    <div class="loading"><span class="spin"></span><span data-i18n="common.loading">Loading…</span></div>
+  </div>
+
+</main>
+
+<script src="translations.js"></script>
+<script>
+const SB_URL = 'https://zgxklwqtnjuhwmigbdkd.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpneGtsd3F0bmp1aHdtaWdiZGtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTcwMjUsImV4cCI6MjA5MjIzMzAyNX0.EHTVKXKr0PRoutgLnpHMAFHElvjkiBlDH1ZNXdyoxIM';
+
+function sbHeaders(){
+  return {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+}
+
+const SOURCES = [
+  {key:'shift-car', table:'carousel_reports', area:'Carousel'},
+  {key:'shift-pott',table:'shift_reports',     area:'Potting'},
+  {key:'shift-wav', table:'wave3_reports',     area:'Wave-3'},
+];
+
+let allData = {};
+let rangeDays = 7;
+let areaFilter = 'all';
+
+function withinRange(rowDate){
+  if(rangeDays === 0) return true;
+  if(!rowDate) return false;
+  const d = new Date(rowDate);
+  if(isNaN(d.getTime())) return false;
+  return d.getTime() >= Date.now() - rangeDays*86400000;
+}
+
+function relTime(iso){
+  const d = new Date(iso);
+  const diff = (Date.now() - d.getTime())/1000;
+  if(diff<60) return Math.floor(diff)+'s ago';
+  if(diff<3600) return Math.floor(diff/60)+'m ago';
+  if(diff<86400) return Math.floor(diff/3600)+'h ago';
+  if(diff<604800) return Math.floor(diff/86400)+'d ago';
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function fetchTable(src){
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/${src.table}?order=submitted_at.desc&limit=2000`, {headers: sbHeaders()});
+    if(!res.ok) return [];
+    return await res.json();
+  } catch(e){
+    console.warn(`Error fetching ${src.table}:`, e);
+    return [];
+  }
+}
+
+async function loadAll(){
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="loading"><span class="spin"></span>Loading…</div>';
+  const results = await Promise.all(SOURCES.map(s => fetchTable(s)));
+  allData = {};
+  SOURCES.forEach((s,i) => { allData[s.key] = results[i] || []; });
+  render();
+}
+
+function extractAllEvents(){
+  // Walk every shift report's downtime_events array
+  const out = [];
+  SOURCES.forEach(src => {
+    (allData[src.key] || []).forEach(row => {
+      if(!withinRange(row.submitted_at)) return;
+      const events = row.downtime_events;
+      if(!Array.isArray(events)) return;
+      events.forEach(ev => {
+        // Skip empty events (some forms allow blank rows)
+        if(!ev.from && !ev.to && !ev.mins && !ev.prob && !ev.action) return;
+        out.push({
+          area: src.area,
+          line: (String(row.line || '').trim()) || '—',
+          tech: row.tech_name || 'Unknown',
+          shift: row.shift || '?',
+          date: row.date || row.submitted_at,
+          submitted_at: row.submitted_at,
+          report_id: row.id,
+          from: ev.from || '',
+          to: ev.to || '',
+          mins: parseFloat(ev.mins) || 0,
+          prob: ev.prob || '',
+          action: ev.action || '',
+        });
+      });
+    });
+  });
+  // Newest first by submitted_at
+  out.sort((a,b) => new Date(b.submitted_at) - new Date(a.submitted_at));
+  return out;
+}
+
+function groupByLine(events){
+  const groups = { 'Carousel':{}, 'Potting':{}, 'Wave-3':{} };
+  events.forEach(e => {
+    if(!groups[e.area][e.line]) groups[e.area][e.line] = [];
+    groups[e.area][e.line].push(e);
+  });
+  return groups;
+}
+
+function countsByArea(events){
+  const c = { all: events.length, 'Carousel':0, 'Potting':0, 'Wave-3':0 };
+  events.forEach(e => { c[e.area] = (c[e.area]||0) + 1; });
+  return c;
+}
+
+function render(){
+  const allEvents = extractAllEvents();
+  const meta = document.getElementById('rangeMeta');
+  meta.textContent = rangeDays === 0
+    ? `All time · ${allEvents.length} event${allEvents.length!==1?'s':''}`
+    : `Last ${rangeDays} day${rangeDays!==1?'s':''} · ${allEvents.length} event${allEvents.length!==1?'s':''}`;
+
+  const counts = countsByArea(allEvents);
+  document.getElementById('cnt-all').textContent  = counts.all;
+  document.getElementById('cnt-car').textContent  = counts['Carousel'];
+  document.getElementById('cnt-pott').textContent = counts['Potting'];
+  document.getElementById('cnt-wav').textContent  = counts['Wave-3'];
+
+  document.querySelectorAll('.apill').forEach(p => {
+    p.classList.toggle('active', p.dataset.area === areaFilter);
+  });
+
+  // KPIs (computed from currently visible set)
+  const visible = areaFilter === 'all' ? allEvents : allEvents.filter(e => e.area === areaFilter);
+  const totalMins = visible.reduce((a,e) => a + e.mins, 0);
+  const avgMins = visible.length === 0 ? 0 : Math.round(totalMins / visible.length);
+  const maxEvent = visible.reduce((a,e) => (e.mins > (a?.mins||0) ? e : a), null);
+  document.getElementById('kpi-events').textContent = visible.length;
+  document.getElementById('kpi-mins').textContent = Math.round(totalMins);
+  document.getElementById('kpi-avg').textContent = avgMins;
+  document.getElementById('kpi-max').textContent = maxEvent ? Math.round(maxEvent.mins) : 0;
+  document.getElementById('kpi-max-sub').textContent = maxEvent
+    ? `${escapeHtml(maxEvent.area)} L${escapeHtml(maxEvent.line)} · ${escapeHtml(maxEvent.prob.slice(0,30) || 'no description')}`
+    : '—';
+  document.getElementById('kpi-events-sub').textContent = areaFilter === 'all' ? 'across all areas' : 'in ' + areaFilter;
+  document.getElementById('kpi-mins-sub').textContent = areaFilter === 'all' ? 'across all events' : 'in ' + areaFilter;
+
+  if(allEvents.length === 0){
+    document.getElementById('content').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">✓</div>
+        <div>No downtime events submitted in this range.</div>
+      </div>`;
+    return;
+  }
+  if(visible.length === 0){
+    document.getElementById('content').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">✓</div>
+        <div>No downtime events for this area in this range.</div>
+      </div>`;
+    return;
+  }
+
+  const groups = groupByLine(visible);
+  const renderOrder = ['Carousel', 'Potting', 'Wave-3'];
+  let html = '';
+
+  renderOrder.forEach(area => {
+    if(areaFilter !== 'all' && areaFilter !== area) return;
+    const areaGroups = groups[area];
+    const lineKeys = Object.keys(areaGroups);
+    if(lineKeys.length === 0) return;
+
+    const totalForArea = lineKeys.reduce((a,k) => a + areaGroups[k].length, 0);
+    const minsForArea = lineKeys.reduce((a,k) => a + areaGroups[k].reduce((aa,e) => aa+e.mins, 0), 0);
+
+    html += `<div class="area-section">
+      <div class="area-hdr">
+        <h2>${escapeHtml(area)}</h2>
+        <div class="area-count">${totalForArea} event${totalForArea!==1?'s':''} · ${Math.round(minsForArea)} mins lost</div>
+      </div>`;
+
+    // Sort lines: numeric first, '—' last
+    lineKeys.sort((a,b) => {
+      if(a === '—' && b !== '—') return 1;
+      if(b === '—' && a !== '—') return -1;
+      return a.localeCompare(b, undefined, {numeric:true});
+    });
+
+    lineKeys.forEach(line => {
+      const lineEvents = areaGroups[line];
+      const lineLabel = line === '—' ? 'Unknown Line' : 'Line ' + line;
+      const lineMins = lineEvents.reduce((a,e) => a + e.mins, 0);
+
+      html += `<div class="line-group">
+        <div class="line-hdr" onclick="toggleLine(this)">
+          <div class="line-hdr-name">
+            <span class="line-hdr-toggle">▼</span>
+            ${escapeHtml(lineLabel)}
+          </div>
+          <div class="line-hdr-meta">
+            <span class="red">${lineEvents.length}</span> event${lineEvents.length!==1?'s':''} · <span class="red">${Math.round(lineMins)}</span> mins lost
+          </div>
+        </div>
+        <div class="line-body">
+          ${lineEvents.map(e => `
+            <div class="dt-row">
+              <div class="dt-mins-badge">
+                ${Math.round(e.mins)}
+                <span class="lbl">MINS</span>
+              </div>
+              <div class="dt-content">
+                <div class="dt-head">
+                  <div class="dt-time">${escapeHtml(e.from || '?')} → ${escapeHtml(e.to || '?')}</div>
+                  <div class="dt-meta">${escapeHtml(e.tech)} · Shift ${escapeHtml(e.shift)} · ${escapeHtml(String(e.date||'').slice(0,10))} · ${relTime(e.submitted_at)}</div>
+                </div>
+                <div class="dt-problem">${e.prob ? escapeHtml(e.prob) : '<span class="dt-no-action">No problem description</span>'}</div>
+                ${e.action ? `<div class="dt-action">${escapeHtml(e.action)}</div>` : '<div class="dt-no-action">No action recorded</div>'}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function toggleLine(headerEl){
+  headerEl.parentElement.classList.toggle('collapsed');
+}
+
+document.getElementById('rangePills').addEventListener('click', e => {
+  const btn = e.target.closest('.rpill');
+  if(!btn) return;
+  document.querySelectorAll('.rpill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  rangeDays = parseInt(btn.dataset.days);
+  render();
+});
+
+document.getElementById('areaPills').addEventListener('click', e => {
+  const btn = e.target.closest('.apill');
+  if(!btn) return;
+  areaFilter = btn.dataset.area;
+  render();
+});
+
+window.onLangChange = function(){ render(); };
+
+loadAll();
+</script>
+
+</body>
+</html>
