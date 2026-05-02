@@ -56,6 +56,14 @@ input,select,textarea{font-size:16px !important;}
 .range-row{display:flex;align-items:center;gap:14px;margin-bottom:24px;flex-wrap:wrap;}
 .range-pills{display:inline-flex;gap:4px;background:var(--sur);border:1px solid var(--bdr);border-radius:8px;padding:4px;}
 
+/* CUSTOM DATE RANGE */
+.custom-range{display:inline-flex;align-items:center;gap:6px;background:var(--sur);border:1px solid var(--amb);border-radius:8px;padding:4px 6px;}
+.custom-date-input{background:var(--bg);border:1px solid var(--bdr2);border-radius:5px;padding:5px 8px;color:var(--txt);font-family:'IBM Plex Mono',monospace;font-size:11px;outline:none;}
+.custom-date-input:focus{border-color:var(--amb);}
+.custom-range-sep{font-family:'IBM Plex Mono',monospace;color:var(--mut);font-size:11px;}
+.custom-range-apply{background:var(--amb);color:#000;border:none;padding:5px 11px;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;cursor:pointer;}
+.custom-range-apply:hover{background:var(--amb-hover);}
+
 /* TYPE FILTER PILLS */
 .type-filter-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
 .type-filter-label{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut2);}
@@ -78,20 +86,21 @@ input,select,textarea{font-size:16px !important;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── KPI STRIP ────────────────────────────────────────────────────────────── */
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
-.kpi{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden;}
-.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-bottom:22px;background:var(--bdr);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;}
+.kpi{background:var(--sur);padding:14px 18px;position:relative;overflow:hidden;cursor:default;}
+.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;}
 .kpi.k-blu::before{background:var(--blu);}
 .kpi.k-grn::before{background:var(--grn);}
 .kpi.k-amb::before{background:var(--amb);}
 .kpi.k-red::before{background:var(--red);}
-.kpi-label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mut2);margin-bottom:6px;}
-.kpi-val{font-size:28px;font-weight:600;line-height:1;font-family:'IBM Plex Mono',monospace;letter-spacing:-.02em;}
+.kpi-label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mut2);margin-bottom:5px;}
+.kpi-val{font-size:24px;font-weight:600;line-height:1;font-family:'IBM Plex Mono',monospace;letter-spacing:-.02em;}
 .kpi.k-blu .kpi-val{color:var(--blu);}
 .kpi.k-grn .kpi-val{color:var(--grn);}
 .kpi.k-amb .kpi-val{color:var(--amb);}
 .kpi.k-red .kpi-val{color:var(--red);}
-.kpi-sub{font-size:11px;color:var(--mut);margin-top:6px;font-family:'IBM Plex Mono',monospace;}
+.kpi-sub{font-size:10.5px;color:var(--mut);margin-top:4px;font-family:'IBM Plex Mono',monospace;}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr);}}
 
 /* ── PANELS ──────────────────────────────────────────────────────────────── */
 .panel{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;margin-bottom:18px;overflow:hidden;}
@@ -125,12 +134,9 @@ input,select,textarea{font-size:16px !important;}
 .dt-cause-meta{font-size:10px;color:var(--mut2);font-family:'IBM Plex Mono',monospace;margin-top:2px;}
 
 /* ── SCOUT FLAGS ─────────────────────────────────────────────────────────── */
-.scout-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}
-.scout-card{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:14px;transition:all .15s;}
-.scout-card.clickable{cursor:pointer;}
-.scout-card.clickable:hover{border-color:var(--bdr2);background:#181d24;}
-.scout-card.active{border-color:var(--amb);background:rgba(var(--amb-rgb), .06);box-shadow:0 0 0 1px var(--amb) inset;}
-.scout-card.active .scout-card-meta{color:var(--amb);}
+.scout-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:0;}
+.scout-card{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:14px;transition:all .15s;cursor:pointer;text-decoration:none;color:var(--txt);display:block;}
+.scout-card:hover{border-color:var(--bdr2);background:#181d24;transform:translateY(-1px);}
 .scout-card-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mut2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
 .scout-card-num{font-size:24px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
 .scout-card.has-attn .scout-card-num{color:var(--red);}
@@ -395,6 +401,13 @@ input,select,textarea{font-size:16px !important;}
       <button class="rpill" data-days="30" data-i18n="analytics.range.30">30 day</button>
       <button class="rpill" data-days="90" data-i18n="analytics.range.90">90 day</button>
       <button class="rpill" data-days="0" data-i18n="analytics.range.all">All time</button>
+      <button class="rpill" data-days="custom" data-i18n="analytics.range.custom">Custom…</button>
+    </div>
+    <div class="custom-range" id="customRange" style="display:none;">
+      <input type="date" id="customFrom" class="custom-date-input">
+      <span class="custom-range-sep">→</span>
+      <input type="date" id="customTo" class="custom-date-input">
+      <button class="custom-range-apply" onclick="applyCustomRange()">Apply</button>
     </div>
     <div class="range-meta" id="rangeMeta"></div>
     <button class="refresh-btn" onclick="loadAll(true)">↻ Refresh</button>
@@ -431,17 +444,24 @@ const SOURCES = [
 
 // ── STATE ──────────────────────────────────────────────────────────────────────
 let allData = {};      // {sourceKey: rows[]}
-let rangeDays = 7;     // 0 = all
+let rangeDays = 7;     // 0 = all, 'custom' = use customFrom/To
+let customFromDate = null;  // 'YYYY-MM-DD' string
+let customToDate = null;
 let wipLineFilter = 'all';  // 'all'|'pott'|'wav'|'car'
 let scoutFilter = 'all';    // 'all' | 'scout-car' | 'scout-pott' | 'scout-wav'
 let typeFilter = 'all';     // 'all' | 'shift' | 'pm' | 'scout'
 
 // ── DATE HELPERS ───────────────────────────────────────────────────────────────
 function withinRange(rowDate){
-  if(rangeDays===0) return true;
   if(!rowDate) return false;
   const d = new Date(rowDate);
   if(isNaN(d.getTime())) return false;
+  if(rangeDays === 'custom'){
+    const from = customFromDate ? new Date(customFromDate + 'T00:00:00').getTime() : -Infinity;
+    const to   = customToDate   ? new Date(customToDate   + 'T23:59:59').getTime() : Infinity;
+    return d.getTime() >= from && d.getTime() <= to;
+  }
+  if(rangeDays === 0) return true;
   const cutoff = Date.now() - rangeDays*86400000;
   return d.getTime() >= cutoff;
 }
@@ -808,7 +828,7 @@ function recentFlags(rows){
 // ── RECENT FEED ────────────────────────────────────────────────────────────────
 function recentFeed(rows){
   const sorted = rows.slice().sort((a,b)=> new Date(b.when) - new Date(a.when));
-  return sorted.slice(0,15);
+  return sorted.slice(0,6);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -819,9 +839,13 @@ function render(){
   const rows = filteredRows();
   const allRows = normalizedRows();
   const meta = document.getElementById('rangeMeta');
-  meta.textContent = rangeDays===0
-    ? `All time · ${allRows.length} reports`
-    : `Last ${rangeDays} days · ${rows.length} of ${allRows.length} reports`;
+  if(rangeDays === 'custom'){
+    meta.textContent = `${customFromDate} → ${customToDate} · ${rows.length} of ${allRows.length} reports`;
+  } else if(rangeDays === 0){
+    meta.textContent = `All time · ${allRows.length} reports`;
+  } else {
+    meta.textContent = `Last ${rangeDays} days · ${rows.length} of ${allRows.length} reports`;
+  }
 
   // ── Update type pill counts and active state
   const counts = {all: allInRange.length, shift:0, pm:0, scout:0};
@@ -893,16 +917,6 @@ function render(){
       render();
     });
   }
-
-  // Wire up scout card filter clicks
-  const scoutGrid = document.getElementById('scoutCardGrid');
-  if(scoutGrid){
-    scoutGrid.addEventListener('click', e => {
-      const card = e.target.closest('.scout-card.clickable');
-      if(!card) return;
-      setScoutFilter(card.dataset.key);
-    });
-  }
 }
 
 // ── KPI strip ────────────────────────────────────────────────────────────────
@@ -939,10 +953,13 @@ function renderProduction(prod){
     <div class="panel">
       <div class="panel-head">
         <h2>${t('analytics.panel.production')}</h2>
-        <div class="legend-strip">
-          <span class="lkey car"><span class="dot"></span>Carousel</span>
-          <span class="lkey pott"><span class="dot"></span>Potting</span>
-          <span class="lkey wav"><span class="dot"></span>Wave-3</span>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span class="panel-meta">units per day</span>
+          <div class="legend-strip">
+            <span class="lkey car"><span class="dot"></span>Carousel</span>
+            <span class="lkey pott"><span class="dot"></span>Potting</span>
+            <span class="lkey wav"><span class="dot"></span>Wave-3</span>
+          </div>
         </div>
       </div>
       <div class="panel-body">
@@ -1241,69 +1258,36 @@ function renderScout(scout, flags){
   const card = (key, label) => {
     const s = scout[key];
     const cls = s.attnTotal>0 ? 'has-attn' : (s.reports>0 ? 'clean' : '');
-    const isActive = scoutFilter === key;
     const meta = s.reports===0 ? 'no reports yet' : `from ${s.reports} report${s.reports!==1?'s':''}`;
-    const isClickable = s.attnTotal > 0;
     return `
-      <div class="scout-card ${cls}${isActive?' active':''}${isClickable?' clickable':''}" data-key="${key}">
+      <a class="scout-card ${cls}" href="Scout_Flags.html">
         <div class="scout-card-name">${label}</div>
         <div class="scout-card-num">${s.attnTotal}</div>
-        <div class="scout-card-meta">${meta}${isClickable?' · click to view':''}</div>
-      </div>`;
+        <div class="scout-card-meta">${meta}</div>
+      </a>`;
   };
 
-  // Filter flag list based on active filter
-  const filteredFlags = scoutFilter === 'all'
-    ? flags.slice(0, 15)              // unfiltered: keep the 15-item preview
-    : flags.filter(f => f.src.key === scoutFilter);  // filtered: show ALL
-
-  const flagsLabel = scoutFilter === 'all'
-    ? (flags.length > 15 ? `Showing 15 most recent of ${flags.length} flagged items` : `${flags.length} flagged item${flags.length!==1?'s':''}`)
-    : `Showing all ${filteredFlags.length} flagged item${filteredFlags.length!==1?'s':''} for this sheet`;
-
+  const totalFlags = flags.length;
   return `
     <div class="panel">
       <div class="panel-head">
         <h2>${t('analytics.panel.scout')}</h2>
         <div style="display:flex;align-items:center;gap:10px">
-          ${scoutFilter !== 'all' ? `<button class="scout-clear-btn" onclick="setScoutFilter('all')">Show all sheets ✕</button>` : ''}
           <a class="flags-review-btn" href="Scout_Flags.html">${t('analytics.flags.button')}</a>
-          <div class="panel-meta">items needing attention</div>
+          <div class="panel-meta">${totalFlags} item${totalFlags!==1?'s':''} needing attention</div>
         </div>
       </div>
       <div class="panel-body">
-        <div class="scout-grid" id="scoutCardGrid">
+        <div class="scout-grid">
           ${card('scout-car', 'Carousel Scout')}
           ${card('scout-pott','Potting Scout')}
           ${card('scout-wav', 'Wave-3 Scout')}
         </div>
-        ${flags.length === 0
-          ? `<div class="empty" style="padding:20px;background:var(--bg);border:1px solid var(--bdr);border-radius:8px"><div class="empty-icon">✓</div>No flagged items in this range.</div>`
-          : `<div class="flag-list-meta">${flagsLabel}</div>
-             <div class="flag-list ${scoutFilter !== 'all' ? 'flag-list-expanded' : ''}">
-              ${filteredFlags.length === 0
-                ? `<div class="empty" style="padding:20px;text-align:center;color:var(--mut2)"><div class="empty-icon">✓</div>No flagged items for this sheet.</div>`
-                : filteredFlags.map(f => `
-                <div class="flag-row">
-                  <div class="flag-head">
-                    <span class="flag-source ${f.src.key.split('-')[1]}">${escapeHtml(f.src.label)}</span>
-                    <span class="flag-when">${escapeHtml(f.tech)} · Line ${escapeHtml(f.line)} · ${relTime(f.when)}</span>
-                  </div>
-                  <div class="flag-section">§${escapeHtml(f.secNum)} ${escapeHtml(f.secTitle)}</div>
-                  <div class="flag-item">${escapeHtml(f.item)}</div>
-                  ${f.note ? `<div class="flag-note">${escapeHtml(f.note)}</div>` : ''}
-                </div>
-              `).join('')}
-            </div>`}
       </div>
     </div>`;
 }
 
-// Filter handler — clicking a scout card filters the flag list to that sheet
-function setScoutFilter(key){
-  scoutFilter = (scoutFilter === key) ? 'all' : key;
-  render();
-}
+// Removed: setScoutFilter (handled via dedicated Scout Flags page now)
 
 // ── Reports by Technician ───────────────────────────────────────────────────
 function renderTechs(techs){
@@ -1456,9 +1440,37 @@ document.getElementById('rangePills').addEventListener('click', e => {
   if(!btn) return;
   document.querySelectorAll('.rpill').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  rangeDays = parseInt(btn.dataset.days);
+  const v = btn.dataset.days;
+  const customRow = document.getElementById('customRange');
+  if(v === 'custom'){
+    rangeDays = 'custom';
+    // Default range: last 14 days, only set if not already chosen
+    if(!customFromDate || !customToDate){
+      const today = new Date();
+      const twoWeeksAgo = new Date(Date.now() - 14*86400000);
+      customFromDate = twoWeeksAgo.toISOString().split('T')[0];
+      customToDate = today.toISOString().split('T')[0];
+      document.getElementById('customFrom').value = customFromDate;
+      document.getElementById('customTo').value = customToDate;
+    }
+    customRow.style.display = 'inline-flex';
+  } else {
+    rangeDays = parseInt(v);
+    customRow.style.display = 'none';
+  }
   render();
 });
+
+function applyCustomRange(){
+  const f = document.getElementById('customFrom').value;
+  const tt = document.getElementById('customTo').value;
+  if(!f || !tt){ showToast('Please select both From and To dates', 't-warn'); return; }
+  if(new Date(f) > new Date(tt)){ showToast('From date must be before To date', 't-warn'); return; }
+  customFromDate = f;
+  customToDate = tt;
+  rangeDays = 'custom';
+  render();
+}
 
 document.getElementById('typePills').addEventListener('click', e => {
   const btn = e.target.closest('.tpill');

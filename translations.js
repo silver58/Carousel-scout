@@ -228,6 +228,7 @@ window.SALCOMP_I18N = {
   'analytics.range.30':    { en: '30 day', es: '30 días' },
   'analytics.range.90':    { en: '90 day', es: '90 días' },
   'analytics.range.all':   { en: 'All time', es: 'Todo el tiempo' },
+  'analytics.range.custom':{ en: 'Custom…', es: 'Personalizar…' },
   'analytics.kpi.reports': { en: 'Reports Submitted', es: 'Reportes Enviados' },
   'analytics.kpi.production': { en: 'Production (units)', es: 'Producción (unidades)' },
   'analytics.kpi.downtime': { en: 'Downtime (mins)', es: 'Tiempo Muerto (min)' },
