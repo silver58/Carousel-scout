@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function(){
+  try {
+    const saved = localStorage.getItem('salcomp_amb_color');
+    if(saved){
+      const c = JSON.parse(saved);
+      const r = document.documentElement;
+      r.style.setProperty('--amb', c.amb);
+      r.style.setProperty('--amb-rgb', c.rgb);
+      r.style.setProperty('--amb-hover', c.hover);
+      r.style.setProperty('--amb-deep', c.deep);
+      r.style.setProperty('--amb-light', c.light);
+      r.style.setProperty('--amb2', c.amb2);
+    }
+  } catch(e){}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salcomp — Submission History</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+:root{
+  --bg:#0d1117;--sur:#161b22;--sur2:#1c2128;--bdr:#21262d;--bdr2:#30363d;
+  --amb:#f0a500;--amb-rgb:240,165,0;--amb-hover:#d59300;--amb-deep:#b07000;--amb-light:#fff5dc;--amb2:#ffd166;
+  --grn:#3fb950;--red:#f85149;--blu:#388bfd;--pur:#a371f7;--cyn:#39c5cf;
+  --txt:#e6edf3;--mut:#d0d7de;--mut2:#b1bac4;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-text-size-adjust:100%;}
+input,select,textarea{font-size:16px !important;}
+@media(min-width:861px){input,select,textarea{font-size:13px !important;}}
+
+.site-header{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.site-header a.back{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:5px 11px;border-radius:6px;cursor:pointer;text-decoration:none;transition:all .15s;flex-shrink:0;}
+.site-header a.back:hover{border-color:var(--amb);color:var(--amb);}
+.logo{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--amb);letter-spacing:.08em;text-transform:uppercase;}
+.lang-toggle{display:inline-flex;align-items:center;background:rgba(0,0,0,.25);border:1px solid var(--bdr);border-radius:6px;padding:2px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.04em;cursor:pointer;user-select:none;flex-shrink:0;}
+.lang-toggle span{padding:4px 9px;border-radius:4px;color:var(--mut2);transition:all .15s;}
+.lang-toggle span.active{background:rgba(var(--amb-rgb), .18);color:var(--amb);}
+
+.main{max-width:1200px;margin:0 auto;padding:24px 28px 60px;}
+.page-title{font-size:22px;font-weight:600;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--mut);margin-bottom:20px;}
+
+.range-row{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
+.range-pills{display:inline-flex;gap:4px;background:var(--sur);border:1px solid var(--bdr);border-radius:8px;padding:4px;}
+.rpill{padding:6px 16px;border-radius:5px;border:none;background:transparent;color:var(--mut);font-size:12px;font-family:'IBM Plex Mono',monospace;font-weight:500;cursor:pointer;transition:all .15s;}
+.rpill:hover{color:var(--txt);}
+.rpill.active{background:rgba(var(--amb-rgb), .12);color:var(--amb);}
+.range-meta{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--mut2);}
+.refresh-btn{background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .15s;margin-left:auto;}
+.refresh-btn:hover{border-color:var(--amb);color:var(--amb);}
+
+.filter-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.filter-row > span.filter-lbl{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--mut2);text-transform:uppercase;letter-spacing:.08em;}
+.fpills{display:inline-flex;gap:3px;background:var(--sur);border:1px solid var(--bdr);border-radius:6px;padding:3px;flex-wrap:wrap;}
+.fpill{padding:5px 13px;border-radius:4px;border:none;background:transparent;color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;font-weight:500;cursor:pointer;transition:all .15s;}
+.fpill:hover{color:var(--txt);}
+.fpill.active{background:rgba(var(--amb-rgb), .15);color:var(--amb);}
+.fpill .count{margin-left:6px;background:var(--bdr2);color:var(--mut);font-size:10px;padding:1px 6px;border-radius:9px;}
+.fpill.active .count{background:rgba(var(--amb-rgb), .28);color:var(--amb);}
+
+.search-row{margin-bottom:18px;}
+.search-input{width:100%;background:var(--sur);border:1px solid var(--bdr);border-radius:8px;padding:10px 14px;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;outline:none;}
+.search-input:focus{border-color:var(--amb);}
+
+/* KPI strip */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+.kpi-card{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:16px 18px;}
+.kpi-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mut2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.kpi-val{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:var(--amb);line-height:1;}
+.kpi-sub{font-size:10.5px;color:var(--mut);margin-top:4px;font-family:'IBM Plex Mono',monospace;}
+@media(max-width:700px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
+
+.loading{padding:60px 20px;text-align:center;color:var(--mut);font-size:14px;}
+.loading .spin{display:inline-block;width:18px;height:18px;border:2px solid var(--bdr2);border-top-color:var(--amb);border-radius:50%;animation:spin .8s linear infinite;margin-right:10px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Day group */
+.day-section{margin-bottom:24px;}
+.day-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--amb);}
+.day-hdr h2{font-size:15px;font-weight:600;color:var(--txt);font-family:'IBM Plex Mono',monospace;letter-spacing:.04em;}
+.day-hdr .day-count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mut);}
+
+/* Submission row */
+.sub-row{background:var(--sur);border:1px solid var(--bdr);border-left-width:4px;border-radius:8px;padding:11px 16px;margin-bottom:6px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;text-decoration:none;color:var(--txt);transition:all .12s;}
+.sub-row:hover{border-color:var(--bdr2);background:#181d24;transform:translateX(2px);}
+.sub-row.scout{border-left-color:var(--amb);}
+.sub-row.shift{border-left-color:var(--blu);}
+.sub-row.pm{border-left-color:var(--red);}
+
+.sub-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:5px;min-width:80px;text-align:center;}
+.sub-tag.scout{background:rgba(var(--amb-rgb), .12);color:var(--amb);border:1px solid rgba(var(--amb-rgb), .25);}
+.sub-tag.shift{background:rgba(56,139,253,.12);color:var(--blu);border:1px solid rgba(56,139,253,.25);}
+.sub-tag.pm{background:rgba(248,81,73,.12);color:var(--red);border:1px solid rgba(248,81,73,.25);}
+
+.sub-info{min-width:0;}
+.sub-tech{font-size:13.5px;font-weight:600;}
+.sub-meta{font-size:11.5px;color:var(--mut);font-family:'IBM Plex Mono',monospace;margin-top:2px;}
+.sub-area{color:var(--txt);}
+
+.sub-time{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--mut2);text-align:right;flex-shrink:0;}
+.sub-time-rel{display:block;font-size:10.5px;color:var(--mut2);}
+
+.empty{padding:48px 20px;text-align:center;color:var(--mut2);font-size:13px;background:var(--sur);border:1px solid var(--bdr);border-radius:10px;}
+.empty-icon{font-size:32px;margin-bottom:10px;opacity:.5;}
+
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px;}
+
+@media(max-width:860px){
+  .site-header{padding:0 14px;height:52px;}
+  .logo{font-size:11px;}
+  .main{padding:14px 14px 40px;}
+  .page-title{font-size:18px;}
+  .range-pills{flex:1;}
+  .rpill{flex:1;text-align:center;padding:7px 4px;}
+  .refresh-btn{margin-left:0;}
+  .sub-row{grid-template-columns:1fr;gap:6px;padding:11px 12px;}
+  .sub-tag{justify-self:start;min-width:0;display:inline-block;}
+  .sub-time{text-align:left;}
+  .sub-time-rel{display:inline;margin-left:8px;}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="back" href="Analytics_Dashboard.html">← Back</a>
+  <div class="logo">📜 Submission History</div>
+  <button class="lang-toggle" onclick="toggleLanguage()">
+    <span class="lang-en active">EN</span><span class="lang-es">ES</span>
+  </button>
+</header>
+
+<main class="main">
+
+  <div class="page-title" data-i18n="history.title">Submission History</div>
+  <div class="page-sub" data-i18n="history.subtitle">All form submissions across the operation, grouped by day.</div>
+
+  <div class="range-row">
+    <div class="range-pills" id="rangePills">
+      <button class="rpill active" data-days="7" data-i18n="analytics.range.7">7 day</button>
+      <button class="rpill" data-days="30" data-i18n="analytics.range.30">30 day</button>
+      <button class="rpill" data-days="90" data-i18n="analytics.range.90">90 day</button>
+      <button class="rpill" data-days="0" data-i18n="analytics.range.all">All time</button>
+    </div>
+    <div class="range-meta" id="rangeMeta"></div>
+    <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+  </div>
+
+  <div class="filter-row">
+    <span class="filter-lbl">Type:</span>
+    <div class="fpills" id="typePills">
+      <button class="fpill active" data-type="all">All<span class="count" id="cnt-all">0</span></button>
+      <button class="fpill" data-type="shift">📋 Shift<span class="count" id="cnt-shift">0</span></button>
+      <button class="fpill" data-type="pm">🔧 PM<span class="count" id="cnt-pm">0</span></button>
+      <button class="fpill" data-type="scout">👁 Scout<span class="count" id="cnt-scout">0</span></button>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <span class="filter-lbl">Area:</span>
+    <div class="fpills" id="areaPills">
+      <button class="fpill active" data-area="all">All<span class="count" id="acnt-all">0</span></button>
+      <button class="fpill" data-area="Carousel">Carousel<span class="count" id="acnt-Carousel">0</span></button>
+      <button class="fpill" data-area="Potting">Potting<span class="count" id="acnt-Potting">0</span></button>
+      <button class="fpill" data-area="Wave-3">Wave-3<span class="count" id="acnt-Wave-3">0</span></button>
+    </div>
+  </div>
+
+  <div class="search-row">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search by tech name, line, shift, date…" oninput="render()">
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Submissions</div>
+      <div class="kpi-val" id="kpi-total">0</div>
+      <div class="kpi-sub" id="kpi-total-sub">in selected range</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Active Days</div>
+      <div class="kpi-val" id="kpi-days">0</div>
+      <div class="kpi-sub">days with submissions</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Unique Techs</div>
+      <div class="kpi-val" id="kpi-techs">0</div>
+      <div class="kpi-sub">contributors</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Latest Activity</div>
+      <div class="kpi-val" id="kpi-latest" style="font-size:18px">—</div>
+      <div class="kpi-sub" id="kpi-latest-sub">—</div>
+    </div>
+  </div>
+
+  <div id="content">
+    <div class="loading"><span class="spin"></span>Loading…</div>
+  </div>
+
+</main>
+
+<script src="translations.js"></script>
+<script>
+const SB_URL = 'https://zgxklwqtnjuhwmigbdkd.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpneGtsd3F0bmp1aHdtaWdiZGtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTcwMjUsImV4cCI6MjA5MjIzMzAyNX0.EHTVKXKr0PRoutgLnpHMAFHElvjkiBlDH1ZNXdyoxIM';
+
+function sbHeaders(){
+  return {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+}
+
+const SOURCES = [
+  {table:'reports',                area:'Carousel', kind:'scout', label:'Carousel Scout',  link:'Carousel_Scout_Checklist.html'},
+  {table:'potting_scout_reports',  area:'Potting',  kind:'scout', label:'Potting Scout',   link:'Potting_Scout_Checklist.html'},
+  {table:'wave3_scout_reports',    area:'Wave-3',   kind:'scout', label:'Wave-3 Scout',    link:'Wave3_Scout_Checklist.html'},
+  {table:'carousel_reports',       area:'Carousel', kind:'shift', label:'Carousel Shift',  link:'Carousel_Shift_Report.html'},
+  {table:'shift_reports',          area:'Potting',  kind:'shift', label:'Potting Shift',   link:'Potting_Shift_Report.html'},
+  {table:'wave3_reports',          area:'Wave-3',   kind:'shift', label:'Wave-3 Shift',    link:'Wave3_Shift_Report.html'},
+  {table:'pm_reports',             area:'(by row)', kind:'pm',    label:'PM Report',        link:null},
+];
+
+let allData = [];
+let rangeDays = 7;
+let typeFilter = 'all';
+let areaFilter = 'all';
+
+function withinRange(rowDate){
+  if(rangeDays === 0) return true;
+  if(!rowDate) return false;
+  const d = new Date(rowDate);
+  if(isNaN(d.getTime())) return false;
+  return d.getTime() >= Date.now() - rangeDays*86400000;
+}
+
+function relTime(iso){
+  const d = new Date(iso);
+  const diff = (Date.now() - d.getTime())/1000;
+  if(diff<60) return Math.floor(diff)+'s ago';
+  if(diff<3600) return Math.floor(diff/60)+'m ago';
+  if(diff<86400) return Math.floor(diff/3600)+'h ago';
+  if(diff<604800) return Math.floor(diff/86400)+'d ago';
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+function dayLabel(iso){
+  const d = new Date(iso);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const yesterday = new Date(now.getTime() - 86400000);
+  const isYesterday = d.toDateString() === yesterday.toDateString();
+  if(isToday) return 'Today · ' + d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  if(isYesterday) return 'Yesterday · ' + d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+}
+
+function dayKey(iso){
+  const d = new Date(iso);
+  return d.toISOString().split('T')[0];
+}
+
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function fetchTable(src){
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/${src.table}?order=submitted_at.desc&limit=2000`, {headers: sbHeaders()});
+    if(!res.ok) return [];
+    return await res.json();
+  } catch(e){
+    console.warn(`Error fetching ${src.table}:`, e);
+    return [];
+  }
+}
+
+async function loadAll(){
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="loading"><span class="spin"></span>Loading…</div>';
+  const results = await Promise.all(SOURCES.map(s => fetchTable(s)));
+  allData = [];
+  SOURCES.forEach((src, idx) => {
+    (results[idx] || []).forEach(row => {
+      // Tech name field varies: scout uses 'tech', shift/PM use 'tech_name'
+      const tech = row.tech || row.tech_name || 'Unknown';
+      // Area: PM reports carry their own; everyone else is fixed by source
+      const area = src.kind === 'pm' ? (row.area || '—') : src.area;
+      allData.push({
+        id: row.id,
+        kind: src.kind,
+        area,
+        label: src.label === 'PM Report' ? `${area} PM` : src.label,
+        link: src.link,
+        tech,
+        line: row.line || '',
+        shift: row.shift || '',
+        date: row.date || '',
+        submitted_at: row.submitted_at,
+      });
+    });
+  });
+  // Newest first
+  allData.sort((a,b) => new Date(b.submitted_at) - new Date(a.submitted_at));
+  render();
+}
+
+function render(){
+  const inRange = allData.filter(s => withinRange(s.submitted_at));
+  const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
+  // Update type counts (always reflect range, ignore type filter)
+  const tCounts = {all: inRange.length, shift:0, pm:0, scout:0};
+  inRange.forEach(s => { tCounts[s.kind] = (tCounts[s.kind]||0) + 1; });
+  document.getElementById('cnt-all').textContent = tCounts.all;
+  document.getElementById('cnt-shift').textContent = tCounts.shift;
+  document.getElementById('cnt-pm').textContent = tCounts.pm;
+  document.getElementById('cnt-scout').textContent = tCounts.scout;
+  document.querySelectorAll('#typePills .fpill').forEach(b => b.classList.toggle('active', b.dataset.type === typeFilter));
+
+  // Update area counts (also ignore area filter)
+  const aCounts = {all: inRange.length, 'Carousel':0, 'Potting':0, 'Wave-3':0};
+  inRange.forEach(s => { aCounts[s.area] = (aCounts[s.area]||0) + 1; });
+  document.getElementById('acnt-all').textContent = aCounts.all;
+  document.getElementById('acnt-Carousel').textContent = aCounts['Carousel'];
+  document.getElementById('acnt-Potting').textContent = aCounts['Potting'];
+  document.getElementById('acnt-Wave-3').textContent = aCounts['Wave-3'];
+  document.querySelectorAll('#areaPills .fpill').forEach(b => b.classList.toggle('active', b.dataset.area === areaFilter));
+
+  // Apply visible filters
+  const visible = inRange.filter(s => {
+    if(typeFilter !== 'all' && s.kind !== typeFilter) return false;
+    if(areaFilter !== 'all' && s.area !== areaFilter) return false;
+    if(query){
+      const hay = [s.tech, s.line, s.shift, s.date, s.label].filter(Boolean).join(' ').toLowerCase();
+      if(!hay.includes(query)) return false;
+    }
+    return true;
+  });
+
+  // KPIs
+  const meta = document.getElementById('rangeMeta');
+  meta.textContent = rangeDays === 0
+    ? `All time · ${visible.length} of ${allData.length} submissions`
+    : `Last ${rangeDays} day${rangeDays!==1?'s':''} · ${visible.length} of ${inRange.length} submissions`;
+  const days = new Set(visible.map(s => dayKey(s.submitted_at))).size;
+  const techs = new Set(visible.map(s => s.tech)).size;
+  document.getElementById('kpi-total').textContent = visible.length;
+  document.getElementById('kpi-days').textContent = days;
+  document.getElementById('kpi-techs').textContent = techs;
+  document.getElementById('kpi-total-sub').textContent =
+    (typeFilter !== 'all' || areaFilter !== 'all' || query)
+      ? 'matching filters' : 'in selected range';
+  if(visible[0]){
+    document.getElementById('kpi-latest').textContent = relTime(visible[0].submitted_at);
+    document.getElementById('kpi-latest-sub').textContent = `${escapeHtml(visible[0].label)} · ${escapeHtml(visible[0].tech)}`;
+  } else {
+    document.getElementById('kpi-latest').textContent = '—';
+    document.getElementById('kpi-latest-sub').textContent = 'no recent activity';
+  }
+
+  if(visible.length === 0){
+    document.getElementById('content').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📭</div>
+        <div>No submissions match the selected filters.</div>
+      </div>`;
+    return;
+  }
+
+  // Group by day
+  const byDay = {};
+  visible.forEach(s => {
+    const k = dayKey(s.submitted_at);
+    if(!byDay[k]) byDay[k] = [];
+    byDay[k].push(s);
+  });
+  const dayKeys = Object.keys(byDay).sort().reverse();
+
+  let html = '';
+  dayKeys.forEach(k => {
+    const submissions = byDay[k];
+    html += `<div class="day-section">
+      <div class="day-hdr">
+        <h2>${escapeHtml(dayLabel(k))}</h2>
+        <div class="day-count">${submissions.length} submission${submissions.length!==1?'s':''}</div>
+      </div>`;
+    submissions.forEach(s => {
+      const time = new Date(s.submitted_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      const lineLabel = s.line ? `Line ${escapeHtml(s.line)}` : '—';
+      const shiftLabel = s.shift ? `Shift ${escapeHtml(s.shift)}` : '';
+      const linkAttrs = s.link ? `href="${escapeHtml(s.link)}"` : 'href="#" onclick="return false"';
+      html += `
+        <a class="sub-row ${s.kind}" ${linkAttrs}>
+          <div class="sub-tag ${s.kind}">${escapeHtml(s.label)}</div>
+          <div class="sub-info">
+            <div class="sub-tech">${escapeHtml(s.tech)}</div>
+            <div class="sub-meta">
+              <span class="sub-area">${escapeHtml(s.area)}</span>
+              ${lineLabel ? ' · ' + lineLabel : ''}
+              ${shiftLabel ? ' · ' + shiftLabel : ''}
+              ${s.date ? ' · ' + escapeHtml(s.date) : ''}
+            </div>
+          </div>
+          <div class="sub-time">
+            ${escapeHtml(time)}
+            <span class="sub-time-rel">${escapeHtml(relTime(s.submitted_at))}</span>
+          </div>
+        </a>`;
+    });
+    html += `</div>`;
+  });
+
+  document.getElementById('content').innerHTML = html;
+}
+
+document.getElementById('rangePills').addEventListener('click', e => {
+  const btn = e.target.closest('.rpill');
+  if(!btn) return;
+  document.querySelectorAll('.rpill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  rangeDays = parseInt(btn.dataset.days);
+  render();
+});
+
+document.getElementById('typePills').addEventListener('click', e => {
+  const btn = e.target.closest('.fpill');
+  if(!btn) return;
+  typeFilter = btn.dataset.type;
+  render();
+});
+
+document.getElementById('areaPills').addEventListener('click', e => {
+  const btn = e.target.closest('.fpill');
+  if(!btn) return;
+  areaFilter = btn.dataset.area;
+  render();
+});
+
+window.onLangChange = function(){ render(); };
+
+loadAll();
+</script>
+
+</body>
+</html>

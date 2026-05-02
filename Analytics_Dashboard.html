@@ -1384,7 +1384,10 @@ function renderFeed(feed){
     <div class="panel">
       <div class="panel-head">
         <h2>${t('analytics.panel.feed')}</h2>
-        <div class="panel-meta">last ${feed.length} across all sources</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <a class="flags-review-btn" href="Submission_History.html">${t('analytics.history.button') || 'Open full history →'}</a>
+          <div class="panel-meta">last ${feed.length} across all sources</div>
+        </div>
       </div>
       <div class="panel-body" style="padding:0">
         <div class="feed">

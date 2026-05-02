@@ -276,6 +276,13 @@ window.SALCOMP_I18N = {
                                   es: 'Abrir revisión completa →' },
   'analytics.downtime.button':  { en: 'Open full review →',
                                   es: 'Abrir revisión completa →' },
+  'analytics.history.button':   { en: 'Open full history →',
+                                  es: 'Ver historial completo →' },
+
+  // Submission History page
+  'history.title':              { en: 'Submission History', es: 'Historial de Envíos' },
+  'history.subtitle':           { en: 'All form submissions across the operation, grouped by day.',
+                                  es: 'Todos los envíos de formularios, agrupados por día.' },
 
   // Downtime Events Review page
   'downtime.title':             { en: 'Downtime Events Review',
