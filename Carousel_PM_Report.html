@@ -162,6 +162,86 @@ input,select,textarea{font-size:16px !important;}
   .item-actions{justify-content:flex-end;}
   .actions{padding:10px 14px;}
 }
+
+/* Hide native number-input spinner arrows */
+input[type="number"]{-moz-appearance:textfield;appearance:textfield;}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+
+.rep-row.expanded{cursor:default;background:var(--bg);border-color:var(--amb);}
+.rep-actions-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--bdr);}
+.rep-print-btn{background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:6px 14px;border-radius:5px;cursor:pointer;transition:all .15s;}
+.rep-print-btn:hover{border-color:var(--amb);color:var(--amb);}
+.rep-edit-btn{background:transparent;border:1px solid var(--amb);color:var(--amb);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:6px 14px;border-radius:5px;cursor:pointer;transition:all .15s;}
+.rep-edit-btn:hover{background:rgba(var(--amb-rgb), .1);}
+.rep-del-btn{background:transparent;border:1px solid rgba(248,81,73,.3);color:var(--red);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:6px 14px;border-radius:5px;cursor:pointer;transition:all .15s;}
+.rep-del-btn:hover{background:rgba(248,81,73,.1);}
+.rep-detail{margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr);font-size:12px;color:var(--mut);font-family:'IBM Plex Mono',monospace;}
+.rep-detail h4{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut2);margin:10px 0 6px;font-family:'IBM Plex Sans',sans-serif;}
+.rep-detail-list{list-style:none;padding:0;margin:0;}
+.rep-detail-list li{padding:4px 0;border-bottom:1px dashed var(--bdr);}
+.rep-detail-list li:last-child{border-bottom:none;}
+.rep-detail-list .ok{color:var(--grn);}
+.rep-detail-list .attn{color:var(--red);}
+.rep-detail-list .na{color:var(--mut2);}
+
+.edit-banner{background:rgba(var(--amb-rgb), .12);border:1px solid var(--amb);border-radius:8px;padding:11px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.edit-banner-text{color:var(--amb);font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;}
+.edit-banner-cancel{background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:5px 12px;border-radius:5px;cursor:pointer;}
+.edit-banner-cancel:hover{border-color:var(--red);color:var(--red);}
+
+@media print {
+  body { background: white; color: black; padding: 0.5in; font-family: 'IBM Plex Sans', sans-serif; font-size: 10pt; }
+  .nav-tabs, .actions, .area-pill, .lang-toggle, .pw-modal, .toast, header, footer, .actions-bar { display: none !important; }
+  .print-only { display: block !important; }
+  .print-hdr { border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .print-hdr h1 { font-size: 18pt; font-weight: 600; }
+  .print-section { page-break-inside: avoid; margin-bottom: 14px; }
+  .print-section h3 { font-size: 11pt; font-weight: 600; border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 6px; }
+  .print-meta { font-size: 9pt; color: #444; }
+}
+
+/* ═══ MOBILE OPTIMIZATIONS — PM Reports ═══ */
+@media(max-width:600px){
+  .site-header{padding:0 12px;height:50px;}
+  .logo{font-size:11px;}
+  .card{padding:14px 12px;margin-bottom:14px;border-radius:10px;}
+  .meta-grid{grid-template-columns:1fr 1fr;gap:8px;}
+  .meta-grid label{font-size:10px;}
+  .field input, .field select, .field textarea{font-size:16px !important;padding:10px 12px;}
+
+  /* Tristate buttons larger */
+  .tristate-btn{padding:9px 14px !important;font-size:13px !important;min-width:64px;}
+  .tristate-row{flex-wrap:wrap;gap:5px;}
+
+  /* Task rows */
+  .item-row{padding:10px 8px;}
+  .item-text{font-size:13px;line-height:1.35;}
+
+  /* Pending flags */
+  .flag-card{padding:11px 12px;}
+  .flag-card-title{font-size:13px;}
+  .flag-card-meta{font-size:10.5px;}
+
+  /* Reports tab */
+  .rep-row{padding:11px 12px;}
+  .rep-row-top{flex-direction:column;gap:4px;}
+  .rep-row-stats{flex-direction:column;gap:3px;}
+
+  .rep-actions-row{flex-direction:column;gap:6px;}
+  .rep-actions-row button{width:100%;padding:10px 14px;}
+
+  .actions{padding:10px 12px;}
+  .actions .btn{padding:13px 20px;font-size:15px;}
+
+  .edit-banner{flex-direction:column;align-items:flex-start;gap:8px;}
+  .edit-banner-cancel{width:100%;}
+
+  .tab-btn{flex:1;padding:11px 6px;font-size:11px;}
+}
+@media(max-width:380px){
+  .meta-grid{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
@@ -899,13 +979,34 @@ async function submitReport(){
     if(!REPORT_PW_HASH) REPORT_PW_HASH = await sha256('7012');
     pmReport.pw_hash = REPORT_PW_HASH;
 
-    // 1. Save the PM report and get its id
-    const res = await fetch(SB_URL+'/rest/v1/pm_reports', {
-      method:'POST', headers: sbHeaders(true), body: JSON.stringify(pmReport)
-    });
-    if(!res.ok) throw new Error(await res.text());
-    const inserted = await res.json();
-    const pmReportId = inserted[0]?.id;
+    let pmReportId;
+    if(editingPmReportId){
+      // EDIT: PATCH the existing PM report
+      const patchData = {...pmReport};
+      delete patchData.submitted_at;
+      delete patchData.pw_hash;
+      const patchRes = await fetch(SB_URL+'/rest/v1/pm_reports?id=eq.'+editingPmReportId, {
+        method:'PATCH',
+        headers:{...sbHeaders(), 'Prefer':'return=minimal'},
+        body: JSON.stringify(patchData)
+      });
+      if(!patchRes.ok) throw new Error(`HTTP ${patchRes.status} — ${await patchRes.text()}`);
+      pmReportId = editingPmReportId;
+      // Clear existing acknowledgments tied to this PM report (we'll re-create below)
+      try {
+        await fetch(SB_URL+'/rest/v1/pm_acknowledgments?pm_report_id=eq.'+editingPmReportId, {
+          method:'DELETE', headers: sbHeaders()
+        });
+      } catch(e){ console.warn('Could not clear old acks:', e); }
+    } else {
+      // 1. Save a new PM report and get its id
+      const res = await fetch(SB_URL+'/rest/v1/pm_reports', {
+        method:'POST', headers: sbHeaders(true), body: JSON.stringify(pmReport)
+      });
+      if(!res.ok) throw new Error(await res.text());
+      const inserted = await res.json();
+      pmReportId = inserted[0]?.id;
+    }
 
     // 2. Save acknowledgments tied to this PM report
     if(acknowledgments.length > 0 && pmReportId){
@@ -925,11 +1026,19 @@ async function submitReport(){
     }
 
     btn.className = 'btn btn-ok';
-    btn.textContent = '✓ PM Report Submitted';
+    if(editingPmReportId){
+      btn.textContent = '✓ PM Report Updated';
+      const banner = document.getElementById('editBanner');
+      if(banner) banner.remove();
+      editingPmReportId = null;
+      showToast('✓ PM report updated', 't-ok');
+    } else {
+      btn.textContent = '✓ PM Report Submitted';
+      showToast(`✓ PM saved · ${acknowledgments.length} item(s) resolved`, 't-ok');
+    }
     document.getElementById('anotherBtn').style.display = '';
     _repCache = null;
     _ackCache = null;
-    showToast(`✓ PM saved · ${acknowledgments.length} item(s) resolved`, 't-ok');
   } catch(e){
     btn.className = 'btn btn-primary';
     btn.textContent = 'Submit PM Report →';
@@ -1020,8 +1129,10 @@ async function renderReports(){
     const when = r.submitted_at ? new Date(r.submitted_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '—';
     const tasks = Array.isArray(r.weekly_tasks) ? r.weekly_tasks : [];
     const okCount = tasks.filter(t => t.state === 'ok').length;
+    const attnCount = tasks.filter(t => t.state === 'attn').length;
+    const naCount = tasks.filter(t => t.state === 'na').length;
     return `
-      <div class="rep-row">
+      <div class="rep-row" id="rep-${r.id}" onclick="toggleRepExpand(${r.id})">
         <div class="rep-row-top">
           <div>
             <div class="rep-row-tech">${escapeHtml(r.tech_name||'Unknown')}</div>
@@ -1030,11 +1141,196 @@ async function renderReports(){
           <div class="rep-row-meta">${when}</div>
         </div>
         <div class="rep-row-stats">
-          <span>Tasks: <strong>${okCount}/${tasks.length} OK</strong></span>
+          <span>Tasks: <strong>${okCount}/${tasks.length} OK</strong>${attnCount?` · <span style="color:var(--red)">${attnCount} attn</span>`:''}${naCount?` · ${naCount} N/A`:''}</span>
           <span>Resolved flags: <strong>${r.resolved_count||0}/${r.pending_count||0}</strong></span>
+        </div>
+        <div class="rep-detail" id="detail-${r.id}" style="display:none;">
+          ${r.notes ? `<h4>General Notes</h4><div>${escapeHtml(r.notes)}</div>` : ''}
+          <h4>Weekly Tasks</h4>
+          <ul class="rep-detail-list">
+            ${tasks.map(t => `<li class="${t.state||''}">${t.state==='ok'?'✓':t.state==='attn'?'⚠':t.state==='na'?'—':'·'} ${escapeHtml(t.text||'')}${t.note?` <span style="color:var(--mut2)">— ${escapeHtml(t.note)}</span>`:''}</li>`).join('')}
+          </ul>
+          <div class="rep-actions-row" onclick="event.stopPropagation();">
+            <button class="rep-print-btn" onclick="printPmReport(${r.id})">🖨 Print this report</button>
+            <button class="rep-edit-btn" onclick="editPmReport(${r.id})">✎ Edit this report</button>
+            <button class="rep-del-btn" onclick="deletePmReport(${r.id})">Delete this report</button>
+          </div>
         </div>
       </div>`;
   }).join('');
+}
+
+function toggleRepExpand(id){
+  const detail = document.getElementById('detail-'+id);
+  const row = document.getElementById('rep-'+id);
+  if(!detail) return;
+  const open = detail.style.display !== 'none';
+  document.querySelectorAll('.rep-detail').forEach(d => d.style.display = 'none');
+  document.querySelectorAll('.rep-row').forEach(r => r.classList.remove('expanded'));
+  if(!open){
+    detail.style.display = '';
+    row.classList.add('expanded');
+  }
+}
+
+// ═══ PRINT ═════════════════════════════════════════════════════════════════
+function printPmReport(id){
+  const r = (_repCache || []).find(x => Number(x.id) === Number(id));
+  if(!r){ showToast('Report not found', 't-warn'); return; }
+  const win = window.open('', '_blank');
+  if(!win){ showToast('Popup blocked — allow popups to print', 't-warn'); return; }
+  const tasks = Array.isArray(r.weekly_tasks) ? r.weekly_tasks : [];
+  const escape = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>PM Report — ${escape(r.tech_name||'Unknown')} · ${escape(r.date||'')}</title>
+<style>
+body{font-family:'IBM Plex Sans',Arial,sans-serif;font-size:10pt;color:#000;background:#fff;padding:0.5in;line-height:1.4;}
+.print-actions{position:fixed;top:8px;right:8px;}
+.print-actions button{padding:8px 18px;font-size:10pt;cursor:pointer;background:#f0a500;color:#fff;border:none;border-radius:5px;font-weight:600;}
+@media print { .print-actions { display: none; } }
+.hdr{border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:16px;display:flex;justify-content:space-between;}
+.hdr h1{font-size:16pt;margin:0;}
+.hdr .meta{font-size:9pt;color:#444;text-align:right;}
+h3{font-size:11pt;border-bottom:1px solid #888;padding-bottom:3px;margin:14px 0 6px;}
+.field{margin:3px 0;}
+.field label{font-weight:600;display:inline-block;min-width:90px;}
+ul{padding-left:0;list-style:none;}
+li{padding:3px 0;border-bottom:1px dashed #ccc;}
+li.ok::before{content:'✓ ';color:#1d7a3a;font-weight:600;}
+li.attn::before{content:'⚠ ';color:#a00;font-weight:600;}
+li.na::before{content:'— ';color:#666;}
+li.none::before{content:'· ';color:#666;}
+.note{color:#666;font-style:italic;font-size:9pt;}
+.foot{margin-top:24px;padding-top:8px;border-top:1px solid #888;font-size:8pt;color:#666;display:flex;justify-content:space-between;}
+</style></head><body>
+<div class="print-actions"><button onclick="window.print()">🖨 Print</button></div>
+<div class="hdr">
+  <div><h1>${escape(AREA)} PM Report</h1></div>
+  <div class="meta">Submitted: ${r.submitted_at ? new Date(r.submitted_at).toLocaleString() : '—'}<br>Report ID: #${r.id}</div>
+</div>
+<div class="field"><label>Date:</label> ${escape(r.date||'—')}</div>
+<div class="field"><label>Shift:</label> ${escape(r.shift||'—')}</div>
+<div class="field"><label>Line:</label> ${escape(r.line||'—')}</div>
+<div class="field"><label>Tech:</label> ${escape(r.tech_name||'—')}</div>
+<div class="field"><label>Signature:</label> ${escape(r.tech_sig||'—')}</div>
+${r.notes ? `<h3>General Notes</h3><div>${escape(r.notes)}</div>` : ''}
+<h3>Weekly Tasks (${tasks.length})</h3>
+<ul>
+  ${tasks.map(t => `<li class="${t.state||'none'}">${escape(t.text||'')}${t.note?` <span class="note">— ${escape(t.note)}</span>`:''}</li>`).join('')}
+</ul>
+<h3>Resolved Flags</h3>
+<div>${r.resolved_count||0} of ${r.pending_count||0} pending scout flags resolved.</div>
+<div class="foot"><span>Salcomp Automation Team</span><span>Generated ${new Date().toLocaleString()}</span></div>
+<script>setTimeout(()=>window.print(),500);</scr`+`ipt>
+</body></html>`;
+  win.document.write(html);
+  win.document.close();
+}
+
+// ═══ DELETE ════════════════════════════════════════════════════════════════
+async function deletePmReport(id){
+  if(!confirm('Delete this PM report? This cannot be undone.')) return;
+  try {
+    const res = await fetch(SB_URL+'/rest/v1/pm_reports?id=eq.'+id, {method:'DELETE', headers: sbHeaders()});
+    if(!res.ok) throw new Error(await res.text());
+    // Best-effort: delete linked acks
+    try { await fetch(SB_URL+'/rest/v1/pm_acknowledgments?pm_report_id=eq.'+id, {method:'DELETE', headers: sbHeaders()}); } catch(e){}
+    _repCache = null;
+    _ackCache = null;
+    showToast('Report deleted', 't-ok');
+    renderReports();
+  } catch(e){
+    showToast('Delete failed — ' + (e.message||''), 't-warn');
+  }
+}
+
+// ═══ EDIT ══════════════════════════════════════════════════════════════════
+let editingPmReportId = null;
+
+async function editPmReport(id){
+  const r = (_repCache || []).find(x => Number(x.id) === Number(id));
+  if(!r){ showToast('Report not found', 't-warn'); return; }
+  if(!confirm('Load this report into the form for editing?\n\nMake changes and click Update Report to save.')) return;
+
+  // Switch to form tab
+  const formTab = document.querySelector('[data-tab="form"]');
+  const repTab  = document.querySelector('[data-tab="reports"]');
+  if(formTab && repTab){
+    formTab.classList.add('active');
+    repTab.classList.remove('active');
+    document.getElementById('pageForm').classList.add('active');
+    document.getElementById('pageReports').classList.remove('active');
+  }
+
+  editingPmReportId = Number(id);
+
+  // Populate header fields
+  const setIf = (eid, v) => { const el = document.getElementById(eid); if(el) el.value = v||''; };
+  setIf('fLine', r.line);
+  setIf('fDate', r.date);
+  setIf('fShift', r.shift);
+  setIf('techName', r.tech_name);
+  setIf('techSig', r.tech_sig);
+  setIf('generalNotes', r.notes);
+
+  // Re-render task list with stored states applied
+  // Each task row has data-task / data-state / .item-note-input
+  const tasks = Array.isArray(r.weekly_tasks) ? r.weekly_tasks : [];
+  tasks.forEach(t => {
+    const row = document.querySelector(`[data-task="${t.id}"]`);
+    if(!row) return;
+    row.dataset.state = t.state || '';
+    // Update visual state of OK/Attn/N/A buttons within this row
+    row.querySelectorAll('.tristate-btn').forEach(b => {
+      const btnState = b.dataset.state;
+      b.classList.toggle('active', btnState === t.state);
+    });
+    const noteEl = row.querySelector('.item-note-input');
+    if(noteEl) noteEl.value = t.note || '';
+    // Show note row if attn
+    const noteWrap = row.querySelector('.item-note-wrap');
+    if(noteWrap) noteWrap.style.display = (t.state === 'attn') ? '' : 'none';
+  });
+
+  // Banner
+  showPmEditBanner(r);
+  const btn = document.getElementById('subBtn');
+  btn.className = 'btn btn-primary';
+  btn.textContent = 'Update Report →';
+  btn.disabled = false;
+  document.getElementById('anotherBtn').style.display = 'none';
+
+  showToast('Report loaded — make changes and click Update Report', 't-ok');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function showPmEditBanner(r){
+  const main = document.querySelector('#pageForm') || document.querySelector('main');
+  if(!main) return;
+  let banner = document.getElementById('editBanner');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'editBanner';
+    banner.className = 'edit-banner';
+    main.insertBefore(banner, main.firstChild);
+  }
+  const submittedStr = r.submitted_at ? new Date(r.submitted_at).toLocaleString() : '—';
+  banner.innerHTML = `
+    <div class="edit-banner-text">✎ Editing PM report #${r.id} — submitted ${submittedStr} by ${r.tech_name||'Unknown'}</div>
+    <button class="edit-banner-cancel" onclick="cancelPmEdit()">Cancel edit</button>
+  `;
+}
+
+function cancelPmEdit(){
+  if(!confirm('Cancel editing? Any changes will be lost.')) return;
+  editingPmReportId = null;
+  const banner = document.getElementById('editBanner');
+  if(banner) banner.remove();
+  const btn = document.getElementById('subBtn');
+  btn.className = 'btn btn-primary';
+  btn.textContent = 'Submit PM Report →';
+  btn.disabled = false;
+  if(typeof resetForm === 'function') resetForm();
+  showToast('Edit cancelled', 't-ok');
 }
 
 // ═══ INITIAL LOAD ═════════════════════════════════════════════════════

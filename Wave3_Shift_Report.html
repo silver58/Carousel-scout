@@ -240,6 +240,74 @@ input,select,textarea{font-size:16px !important;}
 .lang-toggle span{padding:4px 9px;border-radius:4px;color:var(--mut2,#6e7681);transition:all .15s;}
 .lang-toggle span.active{background:rgba(var(--amb-rgb), .18);color:var(--amb,var(--amb));}
 
+
+/* Hide native number-input spinner arrows */
+input[type="number"]{-moz-appearance:textfield;appearance:textfield;}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+
+/* ═══ MOBILE OPTIMIZATIONS — Shift Reports ═══ */
+@media(max-width:600px){
+  /* Header tightens */
+  .site-header{padding:0 12px;height:50px;}
+  .logo{font-size:11px;}
+  .hdr-right{gap:8px;}
+
+  /* Form cards: less padding on mobile */
+  .card{padding:14px 12px;margin-bottom:14px;border-radius:10px;}
+  .card-title{font-size:14px;}
+  .card-sub{font-size:11px;}
+
+  /* Field grids collapse to single column */
+  .fg-2, .fg-3, .fg-4{grid-template-columns:1fr;gap:10px;}
+
+  /* Hr-by-Hr Production table → horizontal scroll with sticky first column */
+  .hr-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -12px;padding:0 12px;}
+  .hr-table{min-width:560px;}
+  .hr-table th, .hr-table td{padding:3px 2px;}
+  .hr-table td input{font-size:13px;padding:8px 2px;}
+
+  /* Major Downtime table → stack rows as cards */
+  .dt-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -12px;padding:0 12px;}
+  .dt-table{min-width:520px;}
+
+  /* WIP slot row stacks */
+  .wip-slot-row{grid-template-columns:1fr;gap:8px;}
+
+  /* 5S row */
+  .fivs-row{grid-template-columns:1fr;gap:6px;}
+
+  /* Yes/No buttons larger tap targets */
+  .yn-btn{padding:10px 18px !important;font-size:14px !important;}
+
+  /* Inputs at native font size to avoid iOS zoom-in */
+  input, select, textarea{font-size:16px !important;}
+
+  /* Reports tab list */
+  .rep-row{padding:12px 14px;}
+  .rep-row-tech{font-size:14px;}
+  .rep-row-meta{font-size:11px;}
+
+  /* Action buttons stack on tiny screens */
+  .rep-actions-row{flex-direction:column;gap:6px;}
+  .rep-actions-row button{width:100%;padding:10px 14px;font-size:12px;}
+
+  /* Submit/sticky bar bigger thumbs */
+  .actions{padding:10px 12px;}
+  .actions .btn{padding:13px 20px;font-size:15px;}
+
+  /* Edit banner stacks */
+  .edit-banner{flex-direction:column;align-items:flex-start;gap:8px;}
+  .edit-banner-text{font-size:11px;line-height:1.4;}
+  .edit-banner-cancel{width:100%;padding:8px;}
+
+  /* Tab buttons full-width feel */
+  .tab-btn{flex:1;padding:11px 6px;font-size:11px;}
+}
+@media(max-width:380px){
+  .hdr-right .lang-toggle{font-size:10px;}
+  .card{padding:12px 10px;}
+}
 </style>
 </head>
 <body>
@@ -296,7 +364,8 @@ input,select,textarea{font-size:16px !important;}
   <div class="card">
     <div class="card-head"><h2 data-i18n="shift.section.production.gt">Hr by Hr Production (Qty) — GT Production</h2></div>
     <div class="card-body">
-      <table class="hr-table">
+      <div class="hr-table-wrap">
+        <table class="hr-table">
         <thead>
           <tr>
             <th>1 Hr</th><th>2 Hr</th><th>3 Hr</th><th>4 Hr</th>
@@ -318,6 +387,7 @@ input,select,textarea{font-size:16px !important;}
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
   </div>
 
@@ -451,7 +521,8 @@ input,select,textarea{font-size:16px !important;}
       <button onclick="addDTRow()" style="background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:4px 10px;border-radius:5px;cursor:pointer;">+ Add Row</button>
     </div>
     <div class="card-body" style="padding:0">
-      <table class="dt-table">
+      <div class="dt-table-wrap">
+        <table class="dt-table">
         <thead><tr>
           <th style="width:15%" data-i18n="dt.from">From</th>
           <th style="width:15%" data-i18n="dt.to">To</th>
@@ -469,6 +540,7 @@ input,select,textarea{font-size:16px !important;}
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
   </div>
 

@@ -342,6 +342,13 @@ input,select,textarea{font-size:16px !important;} /* prevent iOS zoom on focus *
 .rep-del:hover{background:rgba(248,81,73,.1);}
 .rep-print{background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:6px 14px;border-radius:5px;cursor:pointer;transition:all .15s;margin-right:8px;}
 .rep-print:hover{border-color:var(--amb);color:var(--amb);}
+.rep-edit{background:transparent;border:1px solid var(--amb);color:var(--amb);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:5px 12px;border-radius:5px;cursor:pointer;transition:all .15s;margin-right:8px;}
+.rep-edit:hover{background:rgba(var(--amb-rgb), .1);}
+.edit-banner{background:rgba(var(--amb-rgb), .12);border:1px solid var(--amb);border-radius:8px;padding:11px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.edit-banner-text{color:var(--amb);font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;}
+.edit-banner-cancel{background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:5px 12px;border-radius:5px;cursor:pointer;}
+.edit-banner-cancel:hover{border-color:var(--red);color:var(--red);}
+
 
 
 
@@ -386,6 +393,64 @@ input,select,textarea{font-size:16px !important;} /* prevent iOS zoom on focus *
 .lang-toggle span{padding:4px 9px;border-radius:4px;color:var(--mut2,#6e7681);transition:all .15s;}
 .lang-toggle span.active{background:rgba(var(--amb-rgb), .18);color:var(--amb,var(--amb));}
 
+
+/* Hide native number-input spinner arrows */
+input[type="number"]{-moz-appearance:textfield;appearance:textfield;}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+
+/* ═══ MOBILE OPTIMIZATIONS — Scout Sheets ═══ */
+@media(max-width:600px){
+  .site-header{padding:0 12px;height:50px;}
+  .logo{font-size:11px;}
+
+  /* Form header fields */
+  .meta-form{grid-template-columns:1fr 1fr;gap:6px;}
+  .mf input, .mf select{font-size:16px !important;padding:9px 10px;}
+  .mf label{font-size:10px;}
+
+  /* Section card */
+  .sec-card{padding:10px 8px;margin-bottom:10px;}
+  .sec-hdr h3{font-size:13px;}
+  .sec-hdr-num{font-size:10.5px;}
+
+  /* Item rows: stack item text + buttons vertically when narrow */
+  .chk-item{flex-direction:column;align-items:stretch;gap:8px;padding:10px 10px;}
+  .chk-item-text{font-size:13px;line-height:1.35;width:100%;}
+  .chk-item-btns{justify-content:flex-end;gap:5px;width:100%;}
+  .sbtn{flex:1;min-width:0;padding:9px 6px !important;font-size:12px !important;text-align:center;}
+  .sbtn span.icon{display:none;}
+
+  /* Notes textareas */
+  .note-row textarea, .note-row input{font-size:14px !important;padding:9px 10px;}
+
+  /* Section notes */
+  .secnote-row textarea{font-size:14px !important;}
+
+  /* Progress bar */
+  .progress-bar{font-size:11px;}
+
+  /* Section nav (jump-to) */
+  .sec-nav{padding:6px 10px;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .sec-nav-pill{padding:5px 9px;font-size:11px;flex-shrink:0;}
+
+  /* Reports tab */
+  .rep-row{padding:11px 12px;margin-bottom:6px;}
+  .rep-actions{margin-top:10px;flex-direction:column;gap:6px;}
+  .rep-print, .rep-edit, .rep-del{width:100%;text-align:center;padding:9px 14px !important;}
+
+  /* Submit bar */
+  .actions{padding:10px 12px;}
+  .actions .btn{padding:13px 18px;font-size:14px;}
+
+  .edit-banner{flex-direction:column;align-items:flex-start;gap:8px;}
+  .edit-banner-cancel{width:100%;}
+
+  .tab-btn{flex:1;padding:11px 6px;font-size:11px;}
+}
+@media(max-width:380px){
+  .meta-form{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
@@ -1122,6 +1187,10 @@ async function saveReport(report) {
     pw_hash:      report.pwHash || null,
     sections:     report.sections,
   };
+  if(editingScoutId){
+    await updateReportRow(editingScoutId, row);
+    return { id: editingScoutId, ...row };
+  }
   const res = await fetch(SB_URL + '/rest/v1/potting_scout_reports', {
     method: 'POST', headers: sbHeaders(), body: JSON.stringify(row)
   });
@@ -1153,6 +1222,19 @@ async function updateRepCount() {
 
 // ── SUBMIT ─────────────────────────────────────────────────────────────────────
 async function submitForm(){
+  // Required-field gate — ensure tech, date, line are filled
+  const tech = (document.getElementById('fTech').value||'').trim();
+  const date = (document.getElementById('fDate').value||'').trim();
+  const line = (document.getElementById('fLine').value||'').trim();
+  const missing = [];
+  if(!tech) missing.push('Tech Name');
+  if(!date) missing.push('Date');
+  if(!line) missing.push('Line');
+  if(missing.length){
+    showToast('Please fill in: ' + missing.join(', '), 't-warn');
+    return;
+  }
+
   const done=Object.values(status).filter(Boolean).length;
   const attn=Object.values(status).filter(v=>v==='attn').length;
   const pct=Math.round(done/TOTAL*100);
@@ -1204,6 +1286,11 @@ async function submitForm(){
     } else {
       btn.className='btn btn-ok'; btn.textContent='✓ Scout Report Submitted';
       showToast('✓ Report saved & locked','t-ok');
+    if(editingScoutId){
+      const banner = document.getElementById('editBanner');
+      if(banner) banner.remove();
+      editingScoutId = null;
+    }
     }
     btn.disabled=false;
   } catch(e) {
@@ -1366,6 +1453,7 @@ async function renderReports(){
           ${secNotesHtml}
           <div class="rep-actions">
             <button class="rep-print" onclick="printReport(${r.id})">🖨 Print Report</button>
+            <button class="rep-edit" onclick="editScout(${r.id})">✎ Edit Report</button>
             <button class="rep-del" onclick="deleteReport(${r.id})">🗑 Delete Report</button>
           </div>
           `}
@@ -1537,6 +1625,154 @@ ${body}
 </body></html>`);
   win.document.close();
 }
+
+// ═══ SCOUT EDIT MODE ═════════════════════════════════════════════════════════
+let editingScoutId = null;
+
+async function editScout(id){
+  const r = (_reportCache || []).find(x => Number(x.id) === Number(id));
+  if(!r){ showToast('Reload reports tab and try again', 't-warn'); return; }
+  if(!confirm('Load this report into the form for editing?\n\nYou will be on the form tab. Make changes and click Update Report to save.')) return;
+
+  // Switch tabs
+  const formTab = document.getElementById('tabForm');
+  const repTab  = document.getElementById('tabReports');
+  if(formTab){
+    formTab.classList.add('active');
+    if(repTab) repTab.classList.remove('active');
+    document.getElementById('pageForm').classList.add('active');
+    const pr = document.getElementById('pageReports');
+    if(pr) pr.classList.remove('active');
+  }
+
+  editingScoutId = Number(id);
+
+  // Restore header fields
+  const setIfExists = (eid, val) => { const el = document.getElementById(eid); if(el) el.value = (val==null?'':val); };
+  setIfExists('fTech', r.tech);
+  setIfExists('fLine', r.line);
+  setIfExists('fDate', r.date);
+  setIfExists('fShift', r.shift);
+  setIfExists('fWO', r.wo);
+
+  // Clear status maps
+  Object.keys(status).forEach(k => delete status[k]);
+  Object.keys(notes).forEach(k => delete notes[k]);
+  Object.keys(secNotes).forEach(k => delete secNotes[k]);
+
+  // Restore from sections array — only attn items are stored in flaggedItems.
+  // We treat anything not flagged as cleared (no ok/na distinction is preserved
+  // in storage, only attn is). This is a known limitation.
+  if(Array.isArray(r.sections)){
+    const sourceSections = dataFor();
+    r.sections.forEach(savedSec => {
+      if(savedSec.notes) secNotes[savedSec.id] = savedSec.notes;
+      const srcSec = sourceSections.find(s => s.id === savedSec.id);
+      if(!srcSec) return;
+      const flaggedMap = {};
+      (savedSec.flaggedItems||[]).forEach(f => {
+        flaggedMap[f.item] = f.note || '';
+      });
+      srcSec.items.forEach((item, i) => {
+        const tid = itemId(srcSec.id, i);
+        if(flaggedMap.hasOwnProperty(item)){
+          status[tid] = 'attn';
+          notes[tid] = flaggedMap[item];
+        }
+      });
+    });
+  }
+
+  // Apply visual state
+  Object.keys(status).forEach(tid => {
+    const cur = status[tid];
+    if(!cur) return;
+    const row = document.getElementById(`row-${tid}`);
+    if(row) row.className = 'chk-item status-' + cur;
+    ['ok','attn','na'].forEach(v => {
+      const b = document.getElementById(`${v}-${tid}`);
+      if(b) b.className = 'sbtn' + (cur===v ? ` s-${v}` : '');
+    });
+    const noteRow = document.getElementById(`note-${tid}`);
+    if(noteRow) noteRow.className = 'note-row' + (cur==='attn' ? ' show' : '');
+    if(notes[tid]){
+      const noteEl = document.querySelector(`#note-${tid} input, #note-${tid} textarea`);
+      if(noteEl) noteEl.value = notes[tid];
+    }
+  });
+
+  // Section-level notes
+  Object.entries(secNotes).forEach(([sid, val]) => {
+    const el = document.querySelector(`[data-secnote="${sid}"]`);
+    if(el) el.value = val;
+  });
+
+  if(typeof updateProgress === 'function') updateProgress();
+  if(typeof refreshAttn === 'function') refreshAttn();
+
+  // Banner + button
+  showEditBanner(r);
+  const btn = document.getElementById('subBtn');
+  btn.className = 'btn btn-primary';
+  btn.textContent = 'Update Report →';
+  btn.disabled = false;
+
+  showToast('Report loaded — edit and click Update Report', 't-ok');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function showEditBanner(r){
+  const main = document.querySelector('#pageForm') || document.querySelector('main');
+  if(!main) return;
+  let banner = document.getElementById('editBanner');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'editBanner';
+    banner.className = 'edit-banner';
+    main.insertBefore(banner, main.firstChild);
+  }
+  const submittedStr = r.submittedAt ? new Date(r.submittedAt).toLocaleString() : '—';
+  banner.innerHTML = `
+    <div class="edit-banner-text">✎ Editing report #${r.id} — submitted ${submittedStr} by ${r.tech || 'Unknown'}</div>
+    <button class="edit-banner-cancel" onclick="cancelScoutEdit()">Cancel edit</button>
+  `;
+}
+
+function cancelScoutEdit(){
+  if(!confirm('Cancel editing? Any changes will be lost.')) return;
+  editingScoutId = null;
+  const banner = document.getElementById('editBanner');
+  if(banner) banner.remove();
+  const btn = document.getElementById('subBtn');
+  btn.className = 'btn btn-primary';
+  btn.textContent = 'Submit Scout Report →';
+  btn.disabled = false;
+  Object.keys(status).forEach(k => delete status[k]);
+  Object.keys(notes).forEach(k => delete notes[k]);
+  Object.keys(secNotes).forEach(k => delete secNotes[k]);
+  document.querySelectorAll('input,select,textarea').forEach(el => { el.value = ''; });
+  document.querySelectorAll('.chk-item').forEach(el => el.className = 'chk-item');
+  document.querySelectorAll('.sbtn').forEach(el => el.className = 'sbtn');
+  document.querySelectorAll('.note-row').forEach(el => el.className = 'note-row');
+  const fd = document.getElementById('fDate'); if(fd) fd.value = new Date().toISOString().split('T')[0];
+  if(typeof updateProgress === 'function') updateProgress();
+  if(typeof refreshAttn === 'function') refreshAttn();
+  showToast('Edit cancelled', 't-ok');
+}
+
+async function updateReportRow(id, row){
+  const patchData = {...row};
+  delete patchData.submitted_at;
+  delete patchData.pw_hash;
+  const res = await fetch(SB_URL + '/rest/v1/potting_scout_reports?id=eq.' + id, {
+    method: 'PATCH',
+    headers: {...sbHeaders(), 'Prefer':'return=minimal'},
+    body: JSON.stringify(patchData)
+  });
+  if(!res.ok) throw new Error(`HTTP ${res.status} — ${await res.text()}`);
+  return null;
+}
+
 
 async function deleteReport(id){
   const reports=_reportCache||[];
