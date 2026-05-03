@@ -53,12 +53,10 @@ body{
   justify-content:center;
   padding:32px 16px 50px;
   overflow-x:hidden;
-  background-image:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(var(--amb-rgb), .04) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(56,139,253,.025) 0%, transparent 70%);
+  position:relative;
 }
 
-/* BACKGROUND GRID */
+/* BACKGROUND GRID — gentle pulse */
 body::before{
   content:'';
   position:fixed;
@@ -71,6 +69,199 @@ body::before{
   z-index:0;
   mask-image:radial-gradient(ellipse 80% 70% at 50% 50%, black 0%, transparent 90%);
   -webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 50%, black 0%, transparent 90%);
+  animation:gridPulse 8s ease-in-out infinite alternate;
+}
+@keyframes gridPulse{
+  from{opacity:.7;}
+  to  {opacity:1;}
+}
+
+/* ═══ LIVE KPI BAND ═══════════════════════════════════════════ */
+.kpi-band{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1px;
+  background:var(--bdr);
+  border:1px solid var(--bdr);
+  border-radius:14px;
+  overflow:hidden;
+  margin-bottom:30px;
+  animation:fadeUp .6s .15s ease both;
+  position:relative;
+}
+.kpi-band::before{
+  /* Subtle moving shimmer to suggest live-ness */
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(105deg, transparent 30%, rgba(var(--amb-rgb), .04) 50%, transparent 70%);
+  animation:kpiShimmer 6s ease-in-out infinite;
+}
+@keyframes kpiShimmer{
+  0%, 100%{transform:translateX(-30%);}
+  50%{transform:translateX(30%);}
+}
+.kpi-cell{
+  background:var(--sur);
+  padding:14px 18px;
+  display:flex;align-items:center;gap:14px;
+  position:relative;
+  transition:background .2s;
+}
+.kpi-cell:hover{background:#1a2028;}
+.kpi-icon{
+  font-size:22px;line-height:1;flex-shrink:0;
+  width:38px;height:38px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:9px;
+  background:rgba(var(--amb-rgb), .08);
+  border:1px solid rgba(var(--amb-rgb), .18);
+}
+.kpi-text{flex:1;min-width:0;}
+.kpi-num{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:24px;font-weight:600;
+  color:var(--amb);line-height:1;
+  letter-spacing:-.02em;
+}
+.kpi-num.kpi-warn{color:#ff8e3c;}
+.kpi-lbl{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9.5px;color:var(--mut2);
+  text-transform:uppercase;letter-spacing:.1em;
+  margin-top:4px;
+}
+.kpi-spark-cell{padding:10px 16px;}
+.kpi-spark-cell .kpi-text{display:flex;flex-direction:column;gap:6px;}
+.kpi-spark-cell .kpi-lbl{margin-top:0;}
+.kpi-spark{width:100%;height:28px;display:block;}
+.kpi-spark path{fill:none;stroke:var(--amb);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 0 3px rgba(var(--amb-rgb), .5));
+  stroke-dasharray:300;stroke-dashoffset:300;
+  animation:drawSpark 1.4s .3s cubic-bezier(.4,0,.2,1) forwards;}
+.kpi-spark .spark-fill{fill:url(#sparkGrad);stroke:none;opacity:0;animation:fadeFill .8s 1.2s forwards;}
+@keyframes drawSpark{to{stroke-dashoffset:0;}}
+@keyframes fadeFill{to{opacity:.5;}}
+
+@media(max-width:680px){
+  .kpi-band{grid-template-columns:repeat(2,1fr);}
+  .kpi-cell{padding:12px 14px;gap:10px;}
+  .kpi-icon{width:34px;height:34px;font-size:18px;}
+  .kpi-num{font-size:20px;}
+}
+
+/* ═══ AREA STATUS DOT + COUNT BADGE ═══════════════════════════ */
+.area-status-dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;
+  background:var(--mut2);
+  position:relative;z-index:1;
+  transition:background .25s, box-shadow .25s;
+  margin-right:4px;
+}
+.area-status-dot.healthy{background:var(--grn);box-shadow:0 0 8px rgba(63,185,80,.5);}
+.area-status-dot.warn{background:#f6a93f;box-shadow:0 0 8px rgba(246,169,63,.5);}
+.area-status-dot.critical{background:#f85149;box-shadow:0 0 8px rgba(248,81,73,.5);animation:critPulse 1.5s ease-in-out infinite;}
+@keyframes critPulse{
+  0%, 100%{box-shadow:0 0 8px rgba(248,81,73,.5);}
+  50%{box-shadow:0 0 16px rgba(248,81,73,.9);}
+}
+.area-count{
+  position:relative;z-index:1;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;font-weight:600;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--bdr);
+  color:var(--mut);
+  padding:3px 10px;
+  border-radius:14px;
+  letter-spacing:.04em;
+  min-width:30px;text-align:center;
+  transition:all .2s;
+  opacity:0;
+  animation:countFade .4s .8s ease forwards;
+}
+.area-count.has-data{
+  background:rgba(var(--amb-rgb), .12);
+  border-color:rgba(var(--amb-rgb), .25);
+  color:var(--amb);
+}
+.area-btn:hover .area-count.has-data{
+  background:rgba(var(--amb-rgb), .22);
+  transform:scale(1.05);
+}
+@keyframes countFade{from{opacity:0;transform:scale(.8);}to{opacity:1;transform:scale(1);}}
+
+/* ═══ PARTICLE BURST ON AREA OPEN ═════════════════════════════ */
+.particle-burst{
+  position:absolute;left:50%;top:50%;
+  width:0;height:0;pointer-events:none;z-index:5;
+}
+.particle{
+  position:absolute;width:5px;height:5px;border-radius:50%;
+  background:currentColor;
+  opacity:0;
+}
+.particle.fire{
+  animation:particleFly 1s ease-out forwards;
+}
+@keyframes particleFly{
+  0%{opacity:1;transform:translate(0,0) scale(1);}
+  100%{opacity:0;transform:translate(var(--dx,0),var(--dy,-30px)) scale(.4);}
+}
+
+/* ═══ AREA TOOLTIP (hover preview) ═════════════════════════════ */
+.area-tooltip{
+  position:absolute;
+  left:50%;bottom:calc(100% + 8px);
+  transform:translateX(-50%) translateY(4px);
+  background:var(--sur);
+  border:1px solid var(--bdr2);
+  border-radius:8px;
+  padding:8px 14px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--mut);
+  white-space:nowrap;
+  opacity:0;pointer-events:none;
+  transition:all .2s;
+  z-index:10;
+  box-shadow:0 6px 20px rgba(0,0,0,.4);
+}
+.area-tooltip::after{
+  content:'';position:absolute;
+  left:50%;top:100%;transform:translateX(-50%);
+  border:5px solid transparent;
+  border-top-color:var(--bdr2);
+}
+.area-btn:hover .area-tooltip{opacity:1;transform:translateX(-50%) translateY(0);}
+.area-tooltip-tech{color:var(--txt);}
+.area-tooltip-time{color:var(--mut2);}
+
+/* ═══ MESH GRADIENT BACKGROUND (#4) ═══════════════════════════ */
+body::after{
+  content:'';
+  position:fixed;
+  inset:-10%;
+  background-image:
+    radial-gradient(circle 480px at 18% 22%, rgba(var(--amb-rgb), .08) 0%, transparent 60%),
+    radial-gradient(circle 420px at 78% 20%, rgba(56,139,253,.06) 0%, transparent 65%),
+    radial-gradient(circle 380px at 82% 75%, rgba(63,185,80,.05) 0%, transparent 60%),
+    radial-gradient(circle 460px at 22% 80%, rgba(163,113,247,.05) 0%, transparent 60%);
+  animation:meshDrift 32s ease-in-out infinite alternate;
+  pointer-events:none;
+  z-index:0;
+  filter:blur(6px) saturate(1.1);
+}
+@keyframes meshDrift{
+  0%   { transform:translate(0,0) scale(1) rotate(0deg);   }
+  25%  { transform:translate(-2%,1%) scale(1.06) rotate(2deg); }
+  50%  { transform:translate(2%,-2%) scale(.96) rotate(-1deg); }
+  75%  { transform:translate(-1%,2%) scale(1.04) rotate(1deg); }
+  100% { transform:translate(1%,-1%) scale(1.02) rotate(-2deg); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .kpi-band::before, .kpi-spark path, .kpi-spark .spark-fill{animation:none;}
+  .area-count{animation:none;opacity:1;}
+  .particle.fire{animation:none;display:none;}
+  .area-status-dot.critical{animation:none;}
 }
 
 .wrap{position:relative;z-index:1;width:100%;max-width:860px;}
@@ -78,11 +269,16 @@ body::before{
 /* HEADER */
 .hdr{text-align:center;margin-bottom:46px;animation:fadeUp .6s ease both;position:relative;}
 .hdr::before{
-  /* Soft amber halo behind the title for depth */
+  /* Soft amber halo behind the title — gently breathes */
   content:'';position:absolute;left:50%;top:50%;
   width:520px;height:200px;transform:translate(-50%,-50%);
   background:radial-gradient(ellipse, rgba(var(--amb-rgb), .08) 0%, transparent 65%);
   pointer-events:none;z-index:-1;filter:blur(20px);
+  animation:halo 6s ease-in-out infinite alternate;
+}
+@keyframes halo{
+  from{opacity:.7; transform:translate(-50%,-50%) scale(.95);}
+  to  {opacity:1;  transform:translate(-50%,-50%) scale(1.05);}
 }
 
 .hdr-eyebrow{
@@ -94,6 +290,11 @@ body::before{
   border:1px solid rgba(var(--amb-rgb), .25);
   border-radius:24px;padding:5px 16px;margin-bottom:18px;
   box-shadow:0 0 30px rgba(var(--amb-rgb), .08);
+  animation:eyebrowGlow 4s ease-in-out infinite alternate;
+}
+@keyframes eyebrowGlow{
+  from{box-shadow:0 0 20px rgba(var(--amb-rgb), .05);}
+  to  {box-shadow:0 0 40px rgba(var(--amb-rgb), .18);}
 }
 
 .hdr h1{
@@ -129,7 +330,16 @@ body::before{
   padding:5px 14px;border:1px solid var(--bdr);border-radius:20px;
   background:rgba(0,0,0,.2);
 }
-.date-dot{width:7px;height:7px;border-radius:50%;background:var(--grn);box-shadow:0 0 10px var(--grn);animation:pulse 2s infinite;}
+.date-dot{width:7px;height:7px;border-radius:50%;background:var(--grn);box-shadow:0 0 10px var(--grn);position:relative;animation:pulse 2s infinite;}
+.date-dot::after{
+  content:'';position:absolute;inset:-4px;border-radius:50%;
+  border:1px solid var(--grn);
+  animation:pulseRing 2s infinite;
+}
+@keyframes pulseRing{
+  0%   { transform:scale(.6); opacity:.8; }
+  100% { transform:scale(1.8); opacity:0;  }
+}
 
 /* AREAS LAYOUT — collapsible per-area sections */
 .areas{display:flex;flex-direction:column;gap:18px;margin-bottom:30px;}
@@ -146,6 +356,15 @@ body::before{
   transition:all .25s cubic-bezier(.4,0,.2,1);
   position:relative;overflow:hidden;
 }
+.area-btn::before{
+  /* Diagonal shimmer that sweeps across on hover */
+  content:'';position:absolute;top:0;bottom:0;left:-30%;width:30%;
+  background:linear-gradient(105deg, transparent 0%, rgba(255,255,255,.06) 50%, transparent 100%);
+  transform:skewX(-20deg);
+  pointer-events:none;
+  transition:left .8s cubic-bezier(.4,0,.2,1);
+}
+.area-btn:hover::before{left:130%;}
 .area-btn::after{
   /* Soft radial glow that pulls the eye when hovering */
   content:'';position:absolute;inset:0;
@@ -158,7 +377,7 @@ body::before{
 .area.open .area-btn{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.35);}
 .area.open .area-btn::after{opacity:.7;}
 
-/* Icon as a glowing colored badge */
+/* Icon as a glowing colored badge — idle gentle float */
 .area-btn .area-icon{
   width:60px;height:60px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
@@ -166,7 +385,16 @@ body::before{
   border-radius:14px;
   position:relative;z-index:1;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+  animation:iconFloat 4s ease-in-out infinite alternate;
 }
+.area:nth-child(2) .area-btn .area-icon{animation-delay:1.3s;}
+.area:nth-child(3) .area-btn .area-icon{animation-delay:2.6s;}
+@keyframes iconFloat{
+  from{transform:translateY(-2px);}
+  to  {transform:translateY(2px);}
+}
+
+/* The chevron toggle — gently flickers when not open */
 .area-btn .area-name{flex:1;text-align:left;font-size:30px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;line-height:1;position:relative;z-index:1;}
 .area-btn .area-meta{
   font-family:'IBM Plex Mono',monospace;font-size:10px;
@@ -181,6 +409,13 @@ body::before{
   border:1px solid var(--bdr);
   transition:transform .3s cubic-bezier(.4,0,.2,1), color .2s, background .2s;
   position:relative;z-index:1;
+}
+.area:not(.open) .area-btn:hover .area-toggle{
+  animation:bounceArrow 1.2s ease-in-out infinite;
+}
+@keyframes bounceArrow{
+  0%, 100%{transform:translateY(0);}
+  50%{transform:translateY(3px);}
 }
 .area.open .area-btn .area-toggle{transform:rotate(180deg);background:rgba(255,255,255,.08);color:var(--txt);}
 
@@ -207,9 +442,18 @@ body::before{
   gap:14px;
   margin-top:14px;
   padding:0 6px;
-  animation:expandIn .35s cubic-bezier(.4,0,.2,1) both;
 }
 .area.open .area-cards{display:grid;}
+.area.open .area-cards .card{
+  animation:cardSlideIn .45s cubic-bezier(.34,1.56,.64,1) both;
+}
+.area.open .area-cards .card:nth-child(1){animation-delay:.05s;}
+.area.open .area-cards .card:nth-child(2){animation-delay:.13s;}
+.area.open .area-cards .card:nth-child(3){animation-delay:.21s;}
+@keyframes cardSlideIn{
+  from{opacity:0;transform:translateY(-14px) scale(.94);}
+  to  {opacity:1;transform:translateY(0) scale(1);}
+}
 @keyframes expandIn{from{opacity:0;transform:translateY(-12px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
 
 /* ANALYTICS CARD ROW — full width below the grid */
@@ -218,6 +462,42 @@ body::before{
 .card-wide .card-icon{width:58px;height:58px;font-size:28px;}
 .card-wide .card-title{font-size:23px;}
 .card-wide .card-desc{font-size:13px;}
+
+/* Make the analytics card stand out from area buttons */
+.card-analytics{
+  background:linear-gradient(135deg, rgba(57,197,207,.06) 0%, rgba(57,197,207,.02) 60%, var(--sur) 100%);
+  border:1px solid rgba(57,197,207,.25);
+  box-shadow:0 4px 18px rgba(57,197,207,.08);
+  position:relative;
+}
+.card-analytics:hover{
+  border-color:rgba(57,197,207,.5);
+  box-shadow:0 8px 28px rgba(57,197,207,.18);
+  transform:translateY(-3px);
+}
+.analytics-icon{
+  position:relative;
+}
+.analytics-icon::after{
+  content:'';
+  position:absolute;inset:-3px;border-radius:13px;
+  background:radial-gradient(circle, rgba(57,197,207,.3) 0%, transparent 70%);
+  z-index:-1;
+  animation:analyticsGlow 3s ease-in-out infinite alternate;
+}
+@keyframes analyticsGlow{
+  from{opacity:.5;transform:scale(.95);}
+  to  {opacity:1; transform:scale(1.1);}
+}
+.card-analytics-spark{
+  width:64px;height:24px;flex-shrink:0;margin-right:8px;
+  display:flex;align-items:center;
+}
+.card-analytics-spark svg{width:100%;height:100%;}
+
+@media(max-width:520px){
+  .card-analytics-spark{display:none;}
+}
 
 /* BASE CARD */
 .card{
@@ -411,10 +691,41 @@ body::before{
   <div class="hdr">
     <div class="hdr-eyebrow">⚙ Salcomp</div>
     <h1><span data-i18n="app.title">Automation</span><br><span data-i18n="app.title.suffix">Team</span></h1>
-    <p data-i18n="app.subtitle">Select a form to get started</p>
+    <p id="greeting" data-i18n="app.subtitle">Select a form to get started</p>
     <div class="date-badge">
       <span class="date-dot"></span>
       <span id="dateStr"></span>
+    </div>
+  </div>
+
+  <!-- ── LIVE KPI BAND ─────────────────────────────────────────── -->
+  <div class="kpi-band" id="kpiBand">
+    <div class="kpi-cell">
+      <div class="kpi-icon">📋</div>
+      <div class="kpi-text">
+        <div class="kpi-num" data-target="0" id="kpiToday">0</div>
+        <div class="kpi-lbl">reports today</div>
+      </div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-icon">⚠</div>
+      <div class="kpi-text">
+        <div class="kpi-num kpi-warn" data-target="0" id="kpiFlags">0</div>
+        <div class="kpi-lbl">flags pending</div>
+      </div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-icon">👥</div>
+      <div class="kpi-text">
+        <div class="kpi-num" data-target="0" id="kpiTechs">0</div>
+        <div class="kpi-lbl">active techs</div>
+      </div>
+    </div>
+    <div class="kpi-cell kpi-spark-cell">
+      <div class="kpi-text">
+        <div class="kpi-lbl">7-day production</div>
+        <svg class="kpi-spark" id="prodSpark" viewBox="0 0 100 28" preserveAspectRatio="none"></svg>
+      </div>
     </div>
   </div>
 
@@ -424,8 +735,8 @@ body::before{
     <div class="area">
       <button class="area-btn purple" onclick="toggleArea('carousel')">
         <span class="area-icon">🎡</span>
-        <span class="area-name" data-i18n="area.carousel">Carousel</span>
-        <span class="area-toggle" id="toggle-carousel">▾</span>
+        <span class="area-status-dot" id="dot-carousel" title="Status"></span><span class="area-name" data-i18n="area.carousel">Carousel</span>
+        <span class="area-count" id="cnt-carousel" title="Submissions today"></span><span class="area-toggle" id="toggle-carousel">▾</span>
       </button>
       <div class="area-cards" id="cards-carousel">
         <a class="card purple" href="Carousel_Shift_Report.html">
@@ -462,8 +773,8 @@ body::before{
     <div class="area">
       <button class="area-btn green" onclick="toggleArea('potting')">
         <span class="area-icon">💧</span>
-        <span class="area-name" data-i18n="area.potting">Potting</span>
-        <span class="area-toggle" id="toggle-potting">▾</span>
+        <span class="area-status-dot" id="dot-potting" title="Status"></span><span class="area-name" data-i18n="area.potting">Potting</span>
+        <span class="area-count" id="cnt-potting" title="Submissions today"></span><span class="area-toggle" id="toggle-potting">▾</span>
       </button>
       <div class="area-cards" id="cards-potting">
         <a class="card green" href="Potting_Shift_Report.html">
@@ -500,8 +811,8 @@ body::before{
     <div class="area">
       <button class="area-btn blue" onclick="toggleArea('wave3')">
         <span class="area-icon">🌊</span>
-        <span class="area-name" data-i18n="area.wave3">Wave-3</span>
-        <span class="area-toggle" id="toggle-wave3">▾</span>
+        <span class="area-status-dot" id="dot-wave3" title="Status"></span><span class="area-name" data-i18n="area.wave3">Wave-3</span>
+        <span class="area-count" id="cnt-wave3" title="Submissions today"></span><span class="area-toggle" id="toggle-wave3">▾</span>
       </button>
       <div class="area-cards" id="cards-wave3">
         <a class="card blue" href="Wave3_Shift_Report.html">
@@ -538,12 +849,17 @@ body::before{
 
   <!-- ── ANALYTICS — full-width card ─────────────────────────────── -->
   <div class="analytics-row">
-    <a class="card cyan card-wide" href="Analytics_Dashboard.html">
-      <div class="card-icon">📊</div>
+    <a class="card cyan card-wide card-analytics" href="Analytics_Dashboard.html">
+      <div class="card-icon analytics-icon">📊</div>
       <div class="card-body">
         <div class="card-label" data-i18n="card.analytics.label">Live Data</div>
         <div class="card-title" data-i18n="card.analytics.title">Analytics Dashboard</div>
         <div class="card-desc" data-i18n="card.analytics.desc">Production trends · Downtime · Scout flags · Recent activity across all reports</div>
+      </div>
+      <div class="card-analytics-spark">
+        <svg viewBox="0 0 60 22" preserveAspectRatio="none" id="analyticsSpark">
+          <polyline points="0,18 10,15 20,17 30,10 40,12 50,6 60,8" fill="none" stroke="var(--cyn)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/>
+        </svg>
       </div>
       <div class="card-arrow">→</div>
     </a>
@@ -552,21 +868,283 @@ body::before{
 </div>
 
 <script>
+// ──────────────────────────────────────────────────────────────────
+// Date + greeting (time-of-day awareness)
+// ──────────────────────────────────────────────────────────────────
 const d = new Date();
 document.getElementById('dateStr').textContent =
   d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
 
-// ── AREA EXPAND/COLLAPSE ──────────────────────────────────────────
+(function setGreeting(){
+  const h = d.getHours();
+  const greetEl = document.getElementById('greeting');
+  if(!greetEl) return;
+  let shift = '', greet = '';
+  if(h >= 6 && h < 14)   { shift = 'A-shift';    greet = 'Good morning'; }
+  else if(h >= 14 && h < 22){ shift = 'B-shift'; greet = 'Good afternoon'; }
+  else                       { shift = 'C-shift'; greet = 'Good evening'; }
+  // Only update if the user hasn't switched language away from default
+  const lang = (typeof window !== 'undefined' && window.SALCOMP_LANG) || 'en';
+  if(lang === 'en'){
+    greetEl.textContent = `${greet} · ${shift} on the floor`;
+    greetEl.removeAttribute('data-i18n');  // override default translation key
+  }
+})();
+
+// ──────────────────────────────────────────────────────────────────
+// Live data fetch from Supabase — populates KPI band + area badges
+// ──────────────────────────────────────────────────────────────────
+const SB_URL = 'https://zgxklwqtnjuhwmigbdkd.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpneGtsd3F0bmp1aHdtaWdiZGtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTcwMjUsImV4cCI6MjA5MjIzMzAyNX0.EHTVKXKr0PRoutgLnpHMAFHElvjkiBlDH1ZNXdyoxIM';
+const sbHeaders = () => ({'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY});
+
+const TABLES = {
+  carousel: {
+    scout:  'reports',
+    shift:  'carousel_reports',
+  },
+  potting: {
+    scout:  'potting_scout_reports',
+    shift:  'shift_reports',
+  },
+  wave3: {
+    scout:  'wave3_scout_reports',
+    shift:  'wave3_reports',
+  },
+};
+
+const startOfToday = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString();
+const sevenDaysAgo = new Date(d.getTime() - 7*86400000).toISOString();
+
+async function fetchTable(table, sinceIso){
+  try {
+    const url = `${SB_URL}/rest/v1/${table}?submitted_at=gte.${encodeURIComponent(sinceIso)}&order=submitted_at.desc&limit=1000`;
+    const res = await fetch(url, {headers: sbHeaders()});
+    if(!res.ok) return [];
+    return await res.json();
+  } catch(e){
+    return [];
+  }
+}
+
+// Animated number ratchet — counts from 0 → target over ~700ms
+function animateNumber(el, target){
+  if(!el) return;
+  const t = parseInt(target) || 0;
+  const dur = 700;
+  const start = performance.now();
+  function step(now){
+    const p = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);  // ease-out cubic
+    el.textContent = Math.round(t * eased);
+    if(p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// Count flagged items in a single scout row's sections array
+function flagsInScoutRow(row){
+  if(!Array.isArray(row.sections)) return parseInt(row.attn_count) || 0;
+  let n = 0;
+  row.sections.forEach(sec => {
+    if(Array.isArray(sec.flaggedItems)) n += sec.flaggedItems.length;
+  });
+  return n;
+}
+
+// Build a sparkline path from an array of daily totals
+function buildSparkPath(values){
+  if(!values.length) return {line:'', area:''};
+  const w = 100, h = 28, pad = 2;
+  const max = Math.max(...values, 1);
+  const stepX = (w - 2*pad) / Math.max(1, values.length - 1);
+  const points = values.map((v, i) => {
+    const x = pad + i * stepX;
+    const y = h - pad - ((v / max) * (h - 2*pad));
+    return [x, y];
+  });
+  const linePath = points.map((p, i) => (i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`)).join('');
+  const fillPath = `${linePath} L${w-pad},${h-pad} L${pad},${h-pad} Z`;
+  return {line: linePath, area: fillPath};
+}
+
+(async function loadLiveData(){
+  // Fetch all relevant tables in parallel
+  const fetches = [];
+  Object.entries(TABLES).forEach(([area, tables]) => {
+    fetches.push(fetchTable(tables.scout, sevenDaysAgo).then(d => ({area, kind:'scout', data:d})));
+    fetches.push(fetchTable(tables.shift, sevenDaysAgo).then(d => ({area, kind:'shift', data:d})));
+  });
+  fetches.push(fetchTable('pm_reports', sevenDaysAgo).then(d => ({area:'all', kind:'pm', data:d})));
+
+  const results = await Promise.all(fetches);
+
+  // Roll up
+  const byArea = {carousel:{today:0,flags:0,latest:null}, potting:{today:0,flags:0,latest:null}, wave3:{today:0,flags:0,latest:null}};
+  const techsToday = new Set();
+  let totalToday = 0;
+  let totalFlags = 0;
+  // Production by day for sparkline (last 7 days, today is index 6)
+  const prodByDay = new Array(7).fill(0);
+  const todayMs = new Date(startOfToday).getTime();
+
+  results.forEach(({area, kind, data}) => {
+    data.forEach(row => {
+      const submittedAt = new Date(row.submitted_at).getTime();
+      if(isNaN(submittedAt)) return;
+      const isToday = submittedAt >= todayMs;
+
+      // Active techs count (today only)
+      if(isToday){
+        const tech = row.tech || row.tech_name;
+        if(tech) techsToday.add(tech.trim().toLowerCase());
+      }
+
+      // Per-area counters
+      if(area !== 'all' && byArea[area]){
+        if(isToday) byArea[area].today++;
+        if(!byArea[area].latest || submittedAt > byArea[area].latest.t){
+          byArea[area].latest = {
+            t: submittedAt,
+            tech: row.tech || row.tech_name || 'Unknown',
+            line: row.line || '?',
+            kind,
+          };
+        }
+      }
+
+      // Total today
+      if(isToday) totalToday++;
+
+      // Flag count from scout reports
+      if(kind === 'scout'){
+        const f = flagsInScoutRow(row);
+        totalFlags += f;
+        if(area !== 'all' && byArea[area]) byArea[area].flags += f;
+      }
+
+      // Production by day for sparkline (shift only)
+      if(kind === 'shift'){
+        const dayDiff = Math.floor((todayMs - new Date(row.date || row.submitted_at).setHours(0,0,0,0)) / 86400000);
+        if(dayDiff >= 0 && dayDiff < 7){
+          const idx = 6 - dayDiff;  // today = index 6, 6 days ago = index 0
+          const p = parseFloat(row.production_total);
+          if(!isNaN(p)) prodByDay[idx] += p;
+        }
+      }
+    });
+  });
+
+  // Animate KPI numbers
+  animateNumber(document.getElementById('kpiToday'), totalToday);
+  animateNumber(document.getElementById('kpiFlags'), totalFlags);
+  animateNumber(document.getElementById('kpiTechs'), techsToday.size);
+
+  // Per-area badges + status dots
+  Object.entries(byArea).forEach(([area, info]) => {
+    const cnt = document.getElementById('cnt-' + area);
+    if(cnt){
+      if(info.today > 0){
+        cnt.textContent = info.today;
+        cnt.classList.add('has-data');
+        cnt.title = `${info.today} report${info.today!==1?'s':''} today`;
+      } else {
+        cnt.textContent = '0';
+      }
+    }
+    const dot = document.getElementById('dot-' + area);
+    if(dot){
+      // Status: critical if flags > 5, warn if flags > 0, healthy if 0 + reports today, neutral if no activity
+      if(info.flags > 5)      { dot.classList.add('critical'); dot.title = `${info.flags} flags pending — needs attention`; }
+      else if(info.flags > 0) { dot.classList.add('warn');     dot.title = `${info.flags} flag${info.flags!==1?'s':''} pending`; }
+      else if(info.today > 0) { dot.classList.add('healthy');  dot.title = 'No flags · activity today'; }
+      else                    { dot.title = 'No activity in 7 days'; }
+    }
+
+    // Tooltip with last submission info
+    const btn = dot ? dot.closest('.area-btn') : null;
+    if(btn && info.latest){
+      const tt = document.createElement('div');
+      tt.className = 'area-tooltip';
+      const mins = Math.round((Date.now() - info.latest.t) / 60000);
+      const timeStr = mins < 60 ? `${mins}m ago` : mins < 1440 ? `${Math.round(mins/60)}h ago` : `${Math.round(mins/1440)}d ago`;
+      tt.innerHTML = `<span class="area-tooltip-tech">${info.latest.tech}</span> · Line ${info.latest.line} · <span class="area-tooltip-time">${timeStr}</span>`;
+      btn.style.position = 'relative';
+      btn.appendChild(tt);
+    }
+  });
+
+  // Render sparkline
+  const spark = document.getElementById('prodSpark');
+  if(spark && prodByDay.some(v => v > 0)){
+    const {line, area} = buildSparkPath(prodByDay);
+    spark.innerHTML = `
+      <defs>
+        <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--amb)" stop-opacity=".5"/>
+          <stop offset="100%" stop-color="var(--amb)" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path class="spark-fill" d="${area}"/>
+      <path d="${line}"/>
+    `;
+  } else if(spark){
+    spark.innerHTML = `<text x="50" y="18" text-anchor="middle" fill="var(--mut2)" font-size="9" font-family="IBM Plex Mono, monospace">no data</text>`;
+  }
+})();
+
+// ──────────────────────────────────────────────────────────────────
+// AREA EXPAND/COLLAPSE  + particle burst on open
+// ──────────────────────────────────────────────────────────────────
 function toggleArea(area){
-  // Find the parent .area element of this button
   const btn = document.querySelector(`#cards-${area}`);
   if(!btn) return;
   const wrapper = btn.closest('.area');
   if(!wrapper) return;
   const isOpen = wrapper.classList.contains('open');
-  // Collapse all areas first (only one open at a time keeps it clean)
   document.querySelectorAll('.area').forEach(a => a.classList.remove('open'));
-  if(!isOpen) wrapper.classList.add('open');
+  if(!isOpen){
+    wrapper.classList.add('open');
+    fireParticles(wrapper);
+  }
+}
+
+function fireParticles(areaEl){
+  // Skip if user prefers reduced motion
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const btn = areaEl.querySelector('.area-btn');
+  if(!btn) return;
+  // Detect color from button class
+  let color = 'var(--amb)';
+  if(btn.classList.contains('purple')) color = '#a371f7';
+  else if(btn.classList.contains('green')) color = '#3fb950';
+  else if(btn.classList.contains('blue')) color = '#388bfd';
+
+  // Particles emerge from the icon position
+  const burst = document.createElement('div');
+  burst.className = 'particle-burst';
+  burst.style.color = color;
+  // Position: roughly where the icon sits (left side of button)
+  burst.style.left = '64px';
+  burst.style.top = '50%';
+  btn.style.position = 'relative';
+  btn.appendChild(burst);
+
+  // Spawn 8 particles in random directions
+  for(let i = 0; i < 8; i++){
+    const p = document.createElement('div');
+    p.className = 'particle fire';
+    const angle = (Math.PI * 2 * i / 8) + (Math.random() * 0.4 - 0.2);
+    const dist = 30 + Math.random() * 20;
+    p.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+    p.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+    p.style.left = '0';
+    p.style.top = '0';
+    burst.appendChild(p);
+  }
+  // Remove after animation
+  setTimeout(() => burst.remove(), 1100);
 }
 </script>
 <script>

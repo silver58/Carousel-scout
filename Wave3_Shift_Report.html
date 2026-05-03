@@ -267,9 +267,48 @@ input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0
   .hr-table th, .hr-table td{padding:3px 2px;}
   .hr-table td input{font-size:13px;padding:8px 2px;}
 
-  /* Major Downtime table → stack rows as cards */
-  .dt-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -12px;padding:0 12px;}
-  .dt-table{min-width:520px;}
+  /* Major Downtime table → stack rows as cards on mobile */
+  .dt-table-wrap{overflow:visible;margin:0;padding:0;}
+  .dt-table{min-width:0;display:block;}
+  .dt-table thead{display:none;}
+  .dt-table tbody{display:block;}
+  .dt-table tr{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px 8px;
+    padding:12px 10px;
+    margin-bottom:10px;
+    background:var(--bg);
+    border:1px solid var(--bdr2);
+    border-radius:8px;
+    position:relative;
+  }
+  .dt-table tr::before{
+    content:'#' counter(dt-row);
+    counter-increment:dt-row;
+    position:absolute;top:8px;right:10px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;color:var(--mut2);
+    text-transform:uppercase;letter-spacing:.08em;
+  }
+  .dt-table tbody{counter-reset:dt-row;}
+  .dt-table td{display:block;padding:0;border:none;}
+  .dt-table td::before{
+    content:attr(data-label);
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;color:var(--mut2);
+    text-transform:uppercase;letter-spacing:.08em;
+    margin-bottom:3px;
+  }
+  .dt-table td[data-label="Problem"],
+  .dt-table td[data-label="Action Taken"],
+  .dt-table td[data-label="Problema"],
+  .dt-table td[data-label="Acción Tomada"]{grid-column:1 / -1;}
+  .dt-table td input{
+    width:100%;padding:9px 10px;font-size:14px;
+    background:var(--sur);border:1px solid var(--bdr2);
+  }
 
   /* WIP slot row stacks */
   .wip-slot-row{grid-template-columns:1fr;gap:8px;}
@@ -548,7 +587,7 @@ input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0
   <div class="card">
     <div class="card-head"><h2 data-i18n="shift.section.downtime">Down Time (mins) — If no WIP write NW</h2></div>
     <div class="card-body">
-      <table class="hr-table" style="margin-bottom:12px">
+      <div class="hr-table-wrap"><table class="hr-table" style="margin-bottom:12px">
         <thead>
           <tr>
             <th>1 Hr</th><th>2 Hr</th><th>3 Hr</th><th>4 Hr</th>
@@ -569,7 +608,7 @@ input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0
             <td class="total-cell"><input type="text" id="dt-total" readonly placeholder="0"></td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
       <div class="field">
         <label data-i18n="shift.hours_over"># Hours Over Target</label>
         <input type="text" id="fHoursOverTarget" placeholder="e.g. 0.5">
