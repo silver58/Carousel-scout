@@ -636,16 +636,11 @@ body::after{
 
 /* COLOR PICKER */
 .color-picker-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.25);border:1px solid var(--bdr,#21262d);border-radius:6px;padding:4px 9px;cursor:pointer;color:var(--mut2,#b1bac4);font-size:10.5px;font-weight:600;font-family:'IBM Plex Mono',monospace;letter-spacing:.04em;
-  /* Default: top-right next to language toggle (desktop) */
-  position:absolute;top:18px;right:90px;z-index:10;
+  /* Top-left on every viewport — away from language toggle in the top-right */
+  position:absolute;top:18px;left:18px;z-index:10;
 }
 @media(max-width:600px){
-  /* On mobile, move it to the LEFT to avoid the cluster in the top-right */
-  .color-picker-btn{
-    right:auto;
-    left:14px;
-    top:14px;
-  }
+  .color-picker-btn{top:14px;left:14px;}
 }
 .color-picker-btn:hover{border-color:var(--amb);color:var(--amb);}
 .cp-swatch{display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--amb);border:1px solid rgba(255,255,255,.2);}
