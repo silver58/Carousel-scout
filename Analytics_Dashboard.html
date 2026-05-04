@@ -100,6 +100,59 @@ input,select,textarea{font-size:16px !important;}
 .kpi.k-amb .kpi-val{color:var(--amb);}
 .kpi.k-red .kpi-val{color:var(--red);}
 .kpi-sub{font-size:10.5px;color:var(--mut);margin-top:4px;font-family:'IBM Plex Mono',monospace;}
+.delta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.02em;}
+.delta-good{color:var(--grn);}
+.delta-bad{color:var(--red);}
+.delta-flat{color:var(--mut2);}
+.delta-up{color:var(--grn);}
+.delta-down{color:var(--red);}
+
+/* AUTO-REFRESH BADGE */
+.refresh-status{display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mut2);margin-left:auto;}
+.refresh-status .live-dot{width:6px;height:6px;border-radius:50%;background:var(--grn);box-shadow:0 0 6px var(--grn);animation:livePulse 2s infinite;}
+@keyframes livePulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+/* CSV EXPORT BUTTON */
+.csv-btn{background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:4px 10px;border-radius:5px;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
+.csv-btn:hover{border-color:var(--amb);color:var(--amb);}
+
+/* DRILL-DOWN BADGE */
+.drill-active{background:rgba(var(--amb-rgb), .12);border:1px solid var(--amb);border-radius:8px;padding:8px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.drill-active-text{color:var(--amb);font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;}
+.drill-active-clear{background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:4px 10px;border-radius:5px;cursor:pointer;}
+.drill-active-clear:hover{border-color:var(--red);color:var(--red);}
+
+/* GOAL LINE on production chart */
+.goal-line{stroke:var(--amb);stroke-width:1;stroke-dasharray:4,3;opacity:.5;}
+.goal-label{fill:var(--amb);font-family:'IBM Plex Mono',monospace;font-size:9px;}
+
+/* DOWNTIME HEATMAP */
+.dt-heatmap{display:grid;grid-template-columns:auto repeat(24,1fr);gap:2px;font-family:'IBM Plex Mono',monospace;font-size:9px;margin-top:14px;}
+.dt-heatmap-lbl{color:var(--mut2);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+.dt-heatmap-cell{aspect-ratio:1;background:var(--bg);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--mut2);font-size:9.5px;cursor:default;transition:transform .12s;position:relative;}
+.dt-heatmap-cell:hover{transform:scale(1.15);z-index:2;}
+.dt-heatmap-cell[data-tooltip]:hover::after{
+  content:attr(data-tooltip);
+  position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);
+  background:var(--sur2);border:1px solid var(--bdr2);border-radius:5px;
+  padding:5px 9px;font-size:11px;color:var(--txt);white-space:nowrap;pointer-events:none;
+  font-family:'IBM Plex Sans',sans-serif;
+}
+.dt-heatmap-hour-row{display:contents;}
+.dt-heatmap-hours{display:grid;grid-template-columns:auto repeat(24,1fr);gap:2px;margin-bottom:4px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--mut2);}
+.dt-heatmap-hours div{text-align:center;}
+
+/* FLAG AGE BADGES */
+.flag-age{display:inline-block;padding:1px 6px;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-left:6px;vertical-align:middle;}
+.flag-age-new{background:rgba(63,185,80,.15);color:var(--grn);}
+.flag-age-recent{background:rgba(var(--amb-rgb), .15);color:var(--amb);}
+.flag-age-stale{background:rgba(255,138,60,.15);color:#ff8a3c;}
+.flag-age-critical{background:rgba(248,81,73,.15);color:var(--red);animation:critFlash 2s infinite;}
+@keyframes critFlash{0%,100%{opacity:1;}50%{opacity:.6;}}
+
+/* CLICKABLE BAR HINT */
+svg .bar-clickable{cursor:pointer;transition:opacity .12s;}
+svg .bar-clickable:hover{opacity:.7;}
 @media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr);}}
 
 /* ── PANELS ──────────────────────────────────────────────────────────────── */
@@ -175,6 +228,8 @@ input,select,textarea{font-size:16px !important;}
 }
 .tech-row:last-child{border-bottom:none;}
 .tech-row:hover{background:rgba(255,255,255,.02);}
+.tech-row-active{background:rgba(var(--amb-rgb), .08) !important;border-left:2px solid var(--amb);}
+.tech-extra{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--mut);margin-top:2px;letter-spacing:.02em;}
 .tech-name{
   font-size:13px;
   color:var(--txt);
@@ -447,6 +502,7 @@ let allData = {};      // {sourceKey: rows[]}
 let rangeDays = 7;     // 0 = all, 'custom' = use customFrom/To
 let customFromDate = null;  // 'YYYY-MM-DD' string
 let customToDate = null;
+let prodGoal = parseInt(localStorage.getItem('salcomp_prod_goal')) || 0;  // 0 = no goal line
 let wipLineFilter = 'all';  // 'all'|'pott'|'wav'|'car'
 let scoutFilter = 'all';    // 'all' | 'scout-car' | 'scout-pott' | 'scout-wav'
 let typeFilter = 'all';     // 'all' | 'shift' | 'pm' | 'scout'
@@ -505,13 +561,15 @@ async function fetchTable(src){
 
 async function loadAll(showToastMsg){
   const content = document.getElementById('content');
-  content.innerHTML = '<div class="loading"><span class="spin"></span>Loading data from all sources…</div>';
-
+  // Don't show full-screen loading on silent refreshes — keep current view
+  if(showToastMsg !== false){
+    content.innerHTML = '<div class="loading"><span class="spin"></span>Loading data from all sources…</div>';
+  }
   const results = await Promise.all(SOURCES.map(s => fetchTable(s)));
   allData = {};
   SOURCES.forEach((s,i) => { allData[s.key] = results[i] || []; });
-
-  if(showToastMsg) showToast('✓ Refreshed — all sources','t-ok');
+  _lastFetchTime = Date.now();
+  if(showToastMsg === true) showToast('✓ Refreshed — all sources','t-ok');
   render();
 }
 
@@ -598,7 +656,7 @@ function filteredRows(){
 function computeKpis(rows){
   // Dedupe shift rows first so corrected reports don't double-count
   const deduped = dedupShiftRows(rows);
-  let reportCt = rows.length;       // raw count (includes the duplicates we treated as supersedes)
+  let reportCt = rows.length;
   let prodTotal = 0;
   let dtTotal = 0;
   let scoutAttn = 0;
@@ -609,11 +667,48 @@ function computeKpis(rows){
       const dt = parseFloat(r.row.downtime_total);
       if(!isNaN(dt)) dtTotal += dt;
     } else if(r.src.kind==='scout'){
-      // Live recompute from sections to handle edited reports
       scoutAttn += scoutAttnLive(r.row);
     }
   });
   return {reportCt, prodTotal, dtTotal, scoutAttn};
+}
+
+// Compute KPIs for the PREVIOUS period of the same length (for delta comparison)
+// e.g. "last 7 days" delta = current 7 days vs prior 7 days before that.
+function computeKpisPrevPeriod(){
+  const allNorm = normalizedRows();
+  // Determine current period boundaries
+  let curStart, curEnd, prevStart, prevEnd;
+  if(rangeDays === 'custom'){
+    if(!customFromDate || !customToDate) return null;
+    curStart = new Date(customFromDate + 'T00:00:00').getTime();
+    curEnd   = new Date(customToDate   + 'T23:59:59').getTime();
+    const span = curEnd - curStart;
+    prevEnd   = curStart - 1;
+    prevStart = prevEnd - span;
+  } else if(rangeDays === 0){
+    return null;  // no comparison for "all time"
+  } else {
+    curEnd   = Date.now();
+    curStart = curEnd - rangeDays*86400000;
+    prevEnd   = curStart - 1;
+    prevStart = prevEnd - rangeDays*86400000;
+  }
+  // Filter rows in the prev window, applying the active type filter
+  const prevRows = allNorm.filter(r => {
+    if(typeFilter !== 'all' && r.src.kind !== typeFilter) return false;
+    if(!r.when) return false;
+    const t = new Date(r.when).getTime();
+    return t >= prevStart && t <= prevEnd;
+  });
+  return computeKpis(prevRows);
+}
+
+// Compute % change with sensible handling of div-by-zero
+function pctChange(cur, prev){
+  if(prev === 0 && cur === 0) return null;       // both flat
+  if(prev === 0) return Infinity;                 // grew from zero
+  return ((cur - prev) / prev) * 100;
 }
 
 // ── PRODUCTION BY DAY × LINE ──────────────────────────────────────────────────
@@ -630,7 +725,9 @@ function buildProductionSeries(rows){
     if(!byDay[k]) byDay[k] = {pott:0, wav:0, car:0};
     byDay[k][r.src.line] = (byDay[k][r.src.line]||0) + p;
   });
-  const days = Object.keys(byDay).sort();
+  // Fill missing days with zeros so absences show as gaps in the chart
+  const days = fillMissingDays(Object.keys(byDay));
+  days.forEach(k => { if(!byDay[k]) byDay[k] = {pott:0, wav:0, car:0, _missing:true}; });
   return {days, byDay};
 }
 
@@ -646,8 +743,23 @@ function buildDowntimeSeries(rows){
     if(isNaN(dt)) return;
     byDay[k] = (byDay[k]||0) + dt;
   });
-  const days = Object.keys(byDay).sort();
+  const days = fillMissingDays(Object.keys(byDay));
+  days.forEach(k => { if(byDay[k] == null) byDay[k] = 0; });
   return {days, byDay};
+}
+
+// Fill missing days between earliest and latest so chart reflects gaps in submission
+function fillMissingDays(dayKeys){
+  if(!dayKeys.length) return [];
+  const sorted = dayKeys.slice().sort();
+  const start = new Date(sorted[0] + 'T00:00:00');
+  const end = new Date(sorted[sorted.length-1] + 'T00:00:00');
+  const out = [];
+  for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)){
+    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    out.push(k);
+  }
+  return out;
 }
 
 function topCauses(rows){
@@ -862,21 +974,33 @@ function scoutSummary(rows){
 
 // ── REPORTS BY TECHNICIAN ─────────────────────────────────────────────────────
 function techCounts(rows){
-  // {techName: {total, byKey:{sourceKey:n}, lastWhen}}
+  // {techName: {total, byKey, lastWhen, uphSum, uphCount, scoutFlags}}
   const map = {};
   rows.forEach(r => {
     let name = (r.row.tech || r.row.tech_name || '').trim();
     if(!name) name = 'Unknown';
-    if(!map[name]) map[name] = {total:0, byKey:{}, lastWhen:null};
+    if(!map[name]) map[name] = {total:0, byKey:{}, lastWhen:null, uphSum:0, uphCount:0, scoutFlags:0, scoutReports:0};
     map[name].total++;
     map[name].byKey[r.src.key] = (map[name].byKey[r.src.key]||0) + 1;
     if(!map[name].lastWhen || new Date(r.when) > new Date(map[name].lastWhen)){
       map[name].lastWhen = r.when;
     }
+    if(r.src.kind === 'shift'){
+      const p = parseFloat(r.row.production_total);
+      if(!isNaN(p) && p > 0){ map[name].uphSum += p; map[name].uphCount++; }
+    }
+    if(r.src.kind === 'scout'){
+      map[name].scoutReports++;
+      map[name].scoutFlags += scoutAttnLive(r.row);
+    }
   });
-  // Convert to sorted array, biggest first
   return Object.entries(map)
-    .map(([name, d]) => ({name, ...d}))
+    .map(([name, d]) => ({
+      name,
+      ...d,
+      avgUph: d.uphCount > 0 ? Math.round(d.uphSum / d.uphCount) : null,
+      avgFlagsPerScout: d.scoutReports > 0 ? Math.round((d.scoutFlags / d.scoutReports) * 10) / 10 : null,
+    }))
     .sort((a,b) => b.total - a.total || a.name.localeCompare(b.name));
 }
 
@@ -918,19 +1042,21 @@ function recentFeed(rows){
 // ─── RENDER ──────────────────────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────────────────────
 function render(){
-  const allInRange = normalizedRows().filter(r => withinRange(r.when));  // for type pill counts (ignores typeFilter)
-  const rows = filteredRows();
+  const allInRange = normalizedRows().filter(r => withinRange(r.when));
+  const rowsBeforeDrill = filteredRows();
+  const rows = applyDrill(rowsBeforeDrill);
   const allRows = normalizedRows();
   const meta = document.getElementById('rangeMeta');
+  const liveBadge = `<span class="refresh-status"><span class="live-dot"></span>live · updated ${formatLastFetch() || 'just now'}</span>`;
   if(rangeDays === 'custom'){
-    meta.textContent = `${customFromDate} → ${customToDate} · ${rows.length} of ${allRows.length} reports`;
+    meta.innerHTML = `${customFromDate} → ${customToDate} · ${rows.length} of ${allRows.length} reports ${liveBadge}`;
   } else if(rangeDays === 0){
-    meta.textContent = `All time · ${allRows.length} reports`;
+    meta.innerHTML = `All time · ${allRows.length} reports ${liveBadge}`;
   } else {
-    meta.textContent = `Last ${rangeDays} days · ${rows.length} of ${allRows.length} reports`;
+    meta.innerHTML = `Last ${rangeDays} days · ${rows.length} of ${allRows.length} reports ${liveBadge}`;
   }
 
-  // ── Update type pill counts and active state
+  // Type pill counts
   const counts = {all: allInRange.length, shift:0, pm:0, scout:0};
   allInRange.forEach(r => { counts[r.src.kind] = (counts[r.src.kind]||0) + 1; });
   document.getElementById('tcnt-all').textContent   = counts.all;
@@ -942,11 +1068,15 @@ function render(){
   });
 
   if(rows.length===0){
+    const drillBanner = drillFilter
+      ? `<div class="drill-active"><div class="drill-active-text">Drill-down: ${escapeHtml(drillLabel())}</div><button class="drill-active-clear" onclick="clearDrill()">Clear ✕</button></div>`
+      : '';
     document.getElementById('content').innerHTML = `
+      ${drillBanner}
       <div class="empty" style="background:var(--sur);border:1px solid var(--bdr);border-radius:10px;">
         <div class="empty-icon">📭</div>
-        <div>No ${typeFilter==='all'?'':typeFilter+' '}reports submitted in this range yet.</div>
-        <div style="font-size:11px;margin-top:8px;color:var(--mut2);">Try a wider date range${typeFilter!=='all'?' or remove the type filter':''}.</div>
+        <div>No ${typeFilter==='all'?'':typeFilter+' '}reports match the current filters.</div>
+        <div style="font-size:11px;margin-top:8px;color:var(--mut2);">${drillFilter?'Try clearing the drill-down or':'Try a wider date range or'} remove a filter.</div>
       </div>`;
     return;
   }
@@ -967,7 +1097,14 @@ function render(){
   // - 'shift': production, downtime, WIP, UPH (scout panels don't apply)
   // - 'pm': feed + tech leaderboard (most other charts depend on shift fields)
   // - 'scout': scout flags only
-  let panelsHtml = renderKPIs(k);
+  let panelsHtml = '';
+  if(drillFilter){
+    panelsHtml += `<div class="drill-active">
+      <div class="drill-active-text">🔍 Drill-down: ${escapeHtml(drillLabel())} · ${rows.length} matching reports</div>
+      <button class="drill-active-clear" onclick="clearDrill()">Clear ✕</button>
+    </div>`;
+  }
+  panelsHtml += renderKPIs(k, computeKpisPrevPeriod());
   const showShiftPanels = (typeFilter === 'all' || typeFilter === 'shift');
   const showScoutPanels = (typeFilter === 'all' || typeFilter === 'scout');
   if(showShiftPanels){
@@ -1003,28 +1140,46 @@ function render(){
 }
 
 // ── KPI strip ────────────────────────────────────────────────────────────────
-function renderKPIs(k){
+function renderDelta(cur, prev, opts={}){
+  if(prev == null) return '';                      // no comparison available
+  const lowerIsBetter = !!opts.lowerIsBetter;
+  const pct = pctChange(cur, prev);
+  if(pct === null) return '<span class="delta delta-flat">— no change</span>';
+  if(pct === Infinity) return `<span class="delta ${lowerIsBetter?'delta-down':'delta-up'}">↑ new</span>`;
+  const arrow = pct >= 0 ? '↑' : '↓';
+  const isUp = pct >= 0;
+  // "good" if up && !lowerIsBetter, OR down && lowerIsBetter
+  const good = (isUp && !lowerIsBetter) || (!isUp && lowerIsBetter);
+  const cls = good ? 'delta-good' : 'delta-bad';
+  return `<span class="delta ${cls}">${arrow} ${Math.abs(pct).toFixed(0)}% vs prev</span>`;
+}
+
+function renderKPIs(k, kPrev){
+  const dReports = kPrev ? renderDelta(k.reportCt, kPrev.reportCt) : '';
+  const dProd    = kPrev ? renderDelta(k.prodTotal, kPrev.prodTotal) : '';
+  const dDt      = kPrev ? renderDelta(k.dtTotal, kPrev.dtTotal, {lowerIsBetter:true}) : '';
+  const dFlags   = kPrev ? renderDelta(k.scoutAttn, kPrev.scoutAttn, {lowerIsBetter:true}) : '';
   return `
     <div class="kpis">
       <div class="kpi k-blu">
         <div class="kpi-label">${t('analytics.kpi.reports')}</div>
         <div class="kpi-val">${k.reportCt.toLocaleString()}</div>
-        <div class="kpi-sub">scout + shift, all lines</div>
+        <div class="kpi-sub">${dReports || 'scout + shift'}</div>
       </div>
       <div class="kpi k-grn">
         <div class="kpi-label">${t('analytics.kpi.production')}</div>
         <div class="kpi-val">${k.prodTotal.toLocaleString()}</div>
-        <div class="kpi-sub">sum of shift totals</div>
+        <div class="kpi-sub">${dProd || 'sum of shift totals'}</div>
       </div>
       <div class="kpi k-amb">
         <div class="kpi-label">${t('analytics.kpi.downtime')}</div>
         <div class="kpi-val">${k.dtTotal.toLocaleString()}</div>
-        <div class="kpi-sub">recorded in shift reports</div>
+        <div class="kpi-sub">${dDt || 'recorded in shift reports'}</div>
       </div>
       <div class="kpi k-red">
         <div class="kpi-label">${t('analytics.kpi.flags')}</div>
         <div class="kpi-val">${k.scoutAttn.toLocaleString()}</div>
-        <div class="kpi-sub">items needing attention</div>
+        <div class="kpi-sub">${dFlags || 'items needing attention'}</div>
       </div>
     </div>`;
 }
@@ -1036,13 +1191,18 @@ function renderProduction(prod){
     <div class="panel">
       <div class="panel-head">
         <h2>${t('analytics.panel.production')}</h2>
-        <div style="display:flex;align-items:center;gap:14px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <span class="panel-meta">units per day</span>
           <div class="legend-strip">
             <span class="lkey car"><span class="dot"></span>Carousel</span>
             <span class="lkey pott"><span class="dot"></span>Potting</span>
             <span class="lkey wav"><span class="dot"></span>Wave-3</span>
           </div>
+          <label class="goal-input-label" title="Set a daily production target — 0 to hide">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mut2);text-transform:uppercase;letter-spacing:.06em;">Target:</span>
+            <input type="number" min="0" step="1" value="${prodGoal||''}" placeholder="0" onchange="setProdGoal(this.value)" style="width:60px;padding:3px 6px;font-size:11px;background:var(--bg);border:1px solid var(--bdr2);border-radius:4px;color:var(--txt);font-family:'IBM Plex Mono',monospace;text-align:center;outline:none;">
+          </label>
+          <button class="csv-btn" onclick="exportProductionCsv()" title="Download data as CSV">↓ CSV</button>
         </div>
       </div>
       <div class="panel-body">
@@ -1053,6 +1213,12 @@ function renderProduction(prod){
     </div>`;
 }
 
+function setProdGoal(v){
+  prodGoal = Math.max(0, parseInt(v) || 0);
+  try { localStorage.setItem('salcomp_prod_goal', prodGoal); } catch(e){}
+  render();
+}
+
 function drawProductionChart(prod){
   const el = document.getElementById('prodChart');
   if(!el || !prod.days.length) return;
@@ -1060,7 +1226,6 @@ function drawProductionChart(prod){
   const padL = 38, padR = 14, padT = 12, padB = 26;
   const innerW = W - padL - padR, innerH = H - padT - padB;
 
-  // Find max stacked height per day
   let max = 0;
   prod.days.forEach(d => {
     const v = prod.byDay[d];
@@ -1068,14 +1233,11 @@ function drawProductionChart(prod){
     if(total > max) max = total;
   });
   if(max===0) max = 10;
-  // round max up to nice number
   const niceMax = niceRoundUp(max);
 
-  // 5 grid lines
   const gridY = [0, 0.25, 0.5, 0.75, 1].map(t => Math.round(niceMax*t));
   const yPos = v => padT + innerH - (v/niceMax)*innerH;
 
-  // Build line data per source
   const sources = ['car','pott','wav'];
   const colors = {pott:'#3fb950', wav:'#388bfd', car:'#a371f7'};
   const xPos = i => prod.days.length>1
@@ -1091,23 +1253,37 @@ function drawProductionChart(prod){
     svg += `<text x="${padL-6}" y="${y+3}" text-anchor="end" font-size="9" fill="#6e7681">${v}</text>`;
   });
 
-  // X labels (sparse)
+  // GOAL LINE — horizontal target
+  if(typeof prodGoal === 'number' && prodGoal > 0 && prodGoal <= niceMax){
+    const gy = yPos(prodGoal);
+    svg += `<line class="goal-line" x1="${padL}" y1="${gy}" x2="${W-padR}" y2="${gy}"/>`;
+    svg += `<text class="goal-label" x="${W-padR-3}" y="${gy-4}" text-anchor="end">target ${prodGoal}</text>`;
+  }
+
+  // X labels — sparse, with red dot if day was a "missing" day
   const labelEvery = Math.max(1, Math.ceil(prod.days.length/6));
   prod.days.forEach((d, i) => {
-    if(i % labelEvery !== 0 && i !== prod.days.length-1) return;
     const x = xPos(i);
+    const v = prod.byDay[d];
+    const total = (v.pott||0) + (v.wav||0) + (v.car||0);
+    // Mark days with no data as a faint dashed vertical
+    if(total === 0){
+      svg += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${padT+innerH}" stroke="#30363d" stroke-width="1" stroke-dasharray="2,3" opacity=".4"/>`;
+    }
+    if(i % labelEvery !== 0 && i !== prod.days.length-1) return;
     svg += `<text x="${x}" y="${H-8}" text-anchor="middle" font-size="9" fill="#6e7681">${dayLabel(d)}</text>`;
   });
 
-  // Data lines + circles
+  // Data lines + clickable circles (drill-down by day)
   sources.forEach(s => {
     const pts = prod.days.map((d,i) => [xPos(i), yPos(prod.byDay[d][s]||0)]);
     if(pts.length>1){
       const path = pts.map((p,i)=> (i===0?'M':'L')+p[0]+','+p[1]).join(' ');
       svg += `<path d="${path}" fill="none" stroke="${colors[s]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
     }
-    pts.forEach(p => {
-      svg += `<circle cx="${p[0]}" cy="${p[1]}" r="2.5" fill="${colors[s]}"/>`;
+    pts.forEach((p, i) => {
+      const day = prod.days[i];
+      svg += `<circle class="bar-clickable" cx="${p[0]}" cy="${p[1]}" r="3" fill="${colors[s]}" onclick="setDrill('day','${day}')"><title>${day} — click to drill</title></circle>`;
     });
   });
 
@@ -1118,12 +1294,14 @@ function drawProductionChart(prod){
 // ── Downtime ────────────────────────────────────────────────────────────────
 function renderDowntime(dt, causes){
   const hasData = dt.days.length>0 || causes.length>0;
+  const heat = buildDowntimeByHour();
   return `
     <div class="panel">
       <div class="panel-head">
         <h2>${t('analytics.panel.downtime')}</h2>
-        <div style="display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <a class="flags-review-btn" href="Downtime_Events.html">${t('analytics.downtime.button') || 'Open full review →'}</a>
+          <button class="csv-btn" onclick="exportDowntimeCsv()" title="Download events as CSV">↓ CSV</button>
           <div class="panel-meta">${causes.length} unique cause${causes.length!==1?'s':''}</div>
         </div>
       </div>
@@ -1145,7 +1323,91 @@ function renderDowntime(dt, causes){
                 `).join('')}
             </div>
           </div>
+          ${heat.hasData ? renderDowntimeHeatmap(heat) : ''}
         ` : `<div class="empty"><div class="empty-icon">✓</div>No downtime recorded in this range.</div>`}
+      </div>
+    </div>`;
+}
+
+// Build downtime-by-hour-of-day grid: per-area + total
+function buildDowntimeByHour(){
+  const rows = applyDrill(filteredRows());
+  const deduped = dedupShiftRows(rows);
+  // hours[area][24] in minutes
+  const blank = () => Array(24).fill(0);
+  const data = {Total: blank(), Carousel: blank(), Potting: blank(), 'Wave-3': blank()};
+  const areaMap = {'shift-pott':'Potting','shift-wav':'Wave-3','shift-car':'Carousel'};
+  const shiftStarts = {'A':6,'B':14,'C':22};
+  let max = 0;
+  let hasData = false;
+  deduped.forEach(r => {
+    if(r.src.kind!=='shift') return;
+    const area = areaMap[r.src.key];
+    if(!area) return;
+    // First, distribute hourly downtime if present
+    if(Array.isArray(r.row.downtime_hrs)){
+      const startHour = shiftStarts[(r.row.shift||'').trim().charAt(0).toUpperCase()];
+      if(startHour != null){
+        for(let i=0;i<8 && i<r.row.downtime_hrs.length;i++){
+          const v = parseFloat(r.row.downtime_hrs[i]);
+          if(isNaN(v)||v<=0) continue;
+          const h = (startHour + i) % 24;
+          data[area][h] += v;
+          data.Total[h] += v;
+          hasData = true;
+        }
+      }
+    }
+    // Plus major downtime events (use 'from' time as the bucketing hour)
+    const events = r.row.downtime_events;
+    if(Array.isArray(events)){
+      events.forEach(ev => {
+        const mins = parseFloat(ev.mins);
+        if(isNaN(mins)||mins<=0) return;
+        const fromMatch = String(ev.from||'').match(/^(\d{1,2}):/);
+        if(!fromMatch) return;
+        const h = parseInt(fromMatch[1]) % 24;
+        // We've already counted hourly above. To avoid double-counting, add only if hourly array didn't exist.
+        if(!Array.isArray(r.row.downtime_hrs) || r.row.downtime_hrs.every(v => parseFloat(v)===0 || isNaN(parseFloat(v)))){
+          data[area][h] += mins;
+          data.Total[h] += mins;
+          hasData = true;
+        }
+      });
+    }
+  });
+  // Compute max for color scaling
+  data.Total.forEach(v => { if(v > max) max = v; });
+  return {data, max, hasData};
+}
+
+function renderDowntimeHeatmap(heat){
+  // Color scale: green (low) → amber (mid) → red (high)
+  const cellColor = mins => {
+    if(mins === 0) return 'var(--bg)';
+    const ratio = Math.min(1, mins / heat.max);
+    if(ratio < 0.33) return `rgba(63,185,80,${0.18 + ratio * 0.6})`;
+    if(ratio < 0.66) return `rgba(240,165,0,${0.25 + ratio * 0.5})`;
+    return `rgba(248,81,73,${0.3 + ratio * 0.5})`;
+  };
+  const buildRow = (label, hours) => `
+    <div class="dt-heatmap-lbl">${escapeHtml(label)}</div>
+    ${hours.map((mins,h) => {
+      const color = cellColor(mins);
+      const tooltip = mins > 0 ? `${Math.round(mins)} min @ ${h}:00` : `none @ ${h}:00`;
+      return `<div class="dt-heatmap-cell" style="background:${color}" data-tooltip="${tooltip}">${mins>0?Math.round(mins):''}</div>`;
+    }).join('')}
+  `;
+  const hourLabels = Array.from({length:24}, (_,h) => `<div>${h}</div>`).join('');
+  return `
+    <div style="margin-top:18px;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mut2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Downtime by hour-of-day · minutes lost</div>
+      <div class="dt-heatmap-hours"><div></div>${hourLabels}</div>
+      <div class="dt-heatmap">
+        ${buildRow('Total', heat.data.Total)}
+        ${buildRow('Carousel', heat.data.Carousel)}
+        ${buildRow('Potting', heat.data.Potting)}
+        ${buildRow('Wave-3', heat.data['Wave-3'])}
       </div>
     </div>`;
 }
@@ -1410,7 +1672,7 @@ function renderTechs(techs){
     <div class="panel">
       <div class="panel-head">
         <h2>${t('analytics.panel.techs')}</h2>
-        <div class="panel-meta">ranked by submission count · ${techs.length} tech${techs.length!==1?'s':''} · ${totalReports} report${totalReports!==1?'s':''} (${scoutTotal} scout, ${shiftTotal} shift)</div>
+        <div class="panel-meta">click a tech to drill down · ${techs.length} tech${techs.length!==1?'s':''} · ${totalReports} report${totalReports!==1?'s':''} (${scoutTotal} scout, ${shiftTotal} shift)</div>
       </div>
       <div class="panel-body" style="padding:0">
         <div class="tech-list">
@@ -1425,9 +1687,15 @@ function renderTechs(techs){
                 const lbl = SOURCES.find(s => s.key===k).label;
                 return `${lbl}: ${t.byKey[k]}`;
               }).join(' · ');
+            // Scorecard extras: avg UPH (shift) + avg flags per scout
+            const extras = [];
+            if(t.avgUph != null)         extras.push(`<span style="color:var(--grn)">UPH: ${t.avgUph}</span>`);
+            if(t.avgFlagsPerScout != null) extras.push(`flags/scout: ${t.avgFlagsPerScout}`);
+            const extraHtml = extras.length ? `<div class="tech-extra">${extras.join(' · ')}</div>` : '';
+            const isActive = drillFilter && drillFilter.kind==='tech' && drillFilter.value.toLowerCase() === t.name.toLowerCase();
             return `
-              <div class="tech-row">
-                <div class="tech-name">${escapeHtml(t.name)}</div>
+              <div class="tech-row ${isActive?'tech-row-active':''}" onclick="setDrill('tech', ${JSON.stringify(t.name)})" style="cursor:pointer">
+                <div class="tech-name">${escapeHtml(t.name)}${extraHtml}</div>
                 <div class="tech-bar-wrap" title="${escapeHtml(tooltip)}">
                   <div class="tech-bar" style="width:${barWidth}%">
                     ${segs.map(s => `<div class="tech-seg" style="width:${s.pct}%;background:${colors[s.key]}"></div>`).join('')}
@@ -1453,8 +1721,9 @@ function renderFeed(feed){
     <div class="panel">
       <div class="panel-head">
         <h2>${t('analytics.panel.feed')}</h2>
-        <div style="display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <a class="flags-review-btn" href="Submission_History.html">${t('analytics.history.button') || 'Open full history →'}</a>
+          <button class="csv-btn" onclick="exportSubmissionsCsv()" title="Download submissions as CSV">↓ CSV</button>
           <div class="panel-meta">last ${feed.length} across all sources</div>
         </div>
       </div>
@@ -1500,6 +1769,150 @@ function shortTag(src){
 }
 
 // ── HELPERS ─────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────
+// CSV EXPORT
+// ──────────────────────────────────────────────────────────────────
+function csvEscape(v){
+  if(v == null) return '';
+  const s = String(v);
+  if(/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+function downloadCsv(filename, headers, rows){
+  const csv = [headers.map(csvEscape).join(',')]
+    .concat(rows.map(r => r.map(csvEscape).join(',')))
+    .join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+}
+function exportProductionCsv(){
+  const rows = filteredRows();
+  const prod = buildProductionSeries(rows);
+  const out = [];
+  prod.days.forEach(day => {
+    const v = prod.byDay[day] || {pott:0, wav:0, car:0};
+    out.push([day, v.car || 0, v.pott || 0, v.wav || 0, (v.car||0)+(v.pott||0)+(v.wav||0)]);
+  });
+  downloadCsv('production-by-day.csv', ['Date','Carousel','Potting','Wave-3','Total'], out);
+}
+function exportDowntimeCsv(){
+  const rows = filteredRows();
+  const deduped = dedupShiftRows(rows);
+  const out = [];
+  deduped.forEach(r => {
+    if(r.src.kind !== 'shift') return;
+    const events = r.row.downtime_events;
+    if(!Array.isArray(events)) return;
+    events.forEach(ev => {
+      const mins = parseFloat(ev.mins);
+      if(isNaN(mins) || mins <= 0) return;
+      const areaMap = {'shift-pott':'Potting','shift-wav':'Wave-3','shift-car':'Carousel'};
+      out.push([
+        r.date || '',
+        areaMap[r.src.key] || '',
+        r.row.line || '',
+        r.row.shift || '',
+        r.row.tech_name || '',
+        ev.from || '',
+        ev.to || '',
+        mins,
+        ev.prob || '',
+        ev.action || '',
+      ]);
+    });
+  });
+  downloadCsv('downtime-events.csv',
+    ['Date','Area','Line','Shift','Tech','From','To','Mins','Problem','Action'], out);
+}
+function exportSubmissionsCsv(){
+  const rows = filteredRows();
+  const out = rows.map(r => [
+    new Date(r.when).toISOString(),
+    r.src.label || r.src.key,
+    r.src.kind,
+    r.row.tech || r.row.tech_name || '',
+    r.row.line || '',
+    r.row.shift || '',
+    r.row.date || '',
+    r.row.production_total || '',
+    r.row.downtime_total || '',
+    r.src.kind === 'scout' ? scoutAttnLive(r.row) : '',
+  ]);
+  downloadCsv('submissions.csv',
+    ['Submitted','Source','Kind','Tech','Line','Shift','Date','UPH','Downtime','Flags'], out);
+}
+
+// ──────────────────────────────────────────────────────────────────
+// DRILL-DOWN STATE
+// ──────────────────────────────────────────────────────────────────
+let drillFilter = null;  // {kind:'day', value:'2026-04-30'} | {kind:'tech', value:'John D.'} | {kind:'area', value:'Carousel'} | null
+
+function applyDrill(rows){
+  if(!drillFilter) return rows;
+  return rows.filter(r => {
+    if(drillFilter.kind === 'day'){
+      return r.date === drillFilter.value;
+    }
+    if(drillFilter.kind === 'tech'){
+      const tech = (r.row.tech || r.row.tech_name || '').trim().toLowerCase();
+      return tech === drillFilter.value.toLowerCase();
+    }
+    if(drillFilter.kind === 'area'){
+      const areaMap = {
+        'shift-pott':'Potting','shift-wav':'Wave-3','shift-car':'Carousel',
+        'scout-pott':'Potting','scout-wav':'Wave-3','scout-car':'Carousel',
+      };
+      const a = areaMap[r.src.key] || (r.row.area || '');
+      return a === drillFilter.value;
+    }
+    return true;
+  });
+}
+function setDrill(kind, value){
+  drillFilter = (drillFilter && drillFilter.kind===kind && drillFilter.value===value) ? null : {kind, value};
+  render();
+}
+function clearDrill(){ drillFilter = null; render(); }
+function drillLabel(){
+  if(!drillFilter) return '';
+  if(drillFilter.kind === 'day')  return `Day: ${drillFilter.value}`;
+  if(drillFilter.kind === 'tech') return `Tech: ${drillFilter.value}`;
+  if(drillFilter.kind === 'area') return `Area: ${drillFilter.value}`;
+  return drillFilter.value;
+}
+
+// ──────────────────────────────────────────────────────────────────
+// AUTO-REFRESH (silent, every 60s)
+// ──────────────────────────────────────────────────────────────────
+let _autoRefreshTimer = null;
+let _lastFetchTime = null;
+
+function startAutoRefresh(){
+  if(_autoRefreshTimer) clearInterval(_autoRefreshTimer);
+  _autoRefreshTimer = setInterval(() => {
+    // Don't refresh if user is interacting (e.g. inside custom date input)
+    if(document.activeElement && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+    loadAll(false);  // silent
+  }, 60_000);
+}
+function stopAutoRefresh(){
+  if(_autoRefreshTimer){ clearInterval(_autoRefreshTimer); _autoRefreshTimer = null; }
+}
+function formatLastFetch(){
+  if(!_lastFetchTime) return '';
+  const s = Math.round((Date.now() - _lastFetchTime) / 1000);
+  if(s < 5)   return 'just now';
+  if(s < 60)  return `${s}s ago`;
+  if(s < 3600)return `${Math.round(s/60)}m ago`;
+  return `${Math.round(s/3600)}h ago`;
+}
+
 function escapeHtml(s){
   return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -1584,6 +1997,7 @@ document.getElementById('hdrDate').textContent =
   new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
 
 loadAll();
+startAutoRefresh();
 
 window.onLangChange = function() {
   // Re-render the entire dashboard in the new language
