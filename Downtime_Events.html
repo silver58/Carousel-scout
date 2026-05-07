@@ -104,6 +104,22 @@ input,select,textarea{font-size:16px !important;}
 .dt-row:last-child{border-bottom:none;}
 .dt-row:hover{background:rgba(255,255,255,.015);}
 .dt-mins-badge{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--red);background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);border-radius:6px;padding:6px 10px;text-align:center;min-width:70px;}
+.dt-mins-mech{color:var(--red);background:rgba(248,81,73,.1);border-color:rgba(248,81,73,.3);}
+.dt-mins-prod{color:#5fb1ff;background:rgba(95,177,255,.1);border-color:rgba(95,177,255,.3);}
+/* Type pill on event header */
+.dt-time .dt-pill{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9.5px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em;
+  padding:1px 7px;
+  border-radius:9px;
+  margin-left:8px;
+  vertical-align:middle;
+}
+.dt-time .dt-pill-mech{background:rgba(248,81,73,.15);color:var(--red);}
+.dt-time .dt-pill-prod{background:rgba(95,177,255,.15);color:#5fb1ff;}
+.dt-time .dt-pill-unk {background:rgba(110,118,129,.15);color:var(--mut2);}
 .dt-mins-badge .lbl{display:block;font-size:9px;color:var(--mut2);font-weight:500;letter-spacing:.04em;margin-top:1px;}
 .dt-content{min-width:0;}
 .dt-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:5px;flex-wrap:wrap;}
@@ -142,7 +158,7 @@ input,select,textarea{font-size:16px !important;}
 <header class="site-header">
   <a class="back" href="Analytics_Dashboard.html"><span data-i18n="common.back">← Back</span></a>
   <div class="logo">⚠ Downtime Events Review</div>
-  <button class="lang-toggle" onclick="toggleLanguage()" title="Switch language / Cambiar idioma">
+  <button class="lang-toggle" onclick="toggleLanguage()" title="Switch language · Cambiar idioma · Đổi ngôn ngữ">
     <span class="lang-en active">EN</span><span class="lang-es">ES</span>
   </button>
 </header>
@@ -203,6 +219,7 @@ input,select,textarea{font-size:16px !important;}
 
 </main>
 
+<script src="theme.js"></script>
 <script src="translations.js"></script>
 <script>
 const SB_URL = 'https://zgxklwqtnjuhwmigbdkd.supabase.co';
@@ -274,7 +291,11 @@ function extractAllEvents(){
       if(!Array.isArray(events)) return;
       events.forEach(ev => {
         // Skip empty events (some forms allow blank rows)
-        if(!ev.from && !ev.to && !ev.mins && !ev.prob && !ev.action) return;
+        if(!ev.from && !ev.to && !ev.mins && !ev.prob && !ev.action && !ev.type && !ev.cause) return;
+        // Determine type, defaulting old data
+        const type = ev.type || (ev.prob ? 'mech' : '');
+        const cause = ev.cause || (type === 'prod' ? (ev.prob || '') : '');
+        const prob = type === 'prod' ? '' : (ev.prob || '');
         out.push({
           area: src.area,
           line: (String(row.line || '').trim()) || '—',
@@ -286,7 +307,9 @@ function extractAllEvents(){
           from: ev.from || '',
           to: ev.to || '',
           mins: parseFloat(ev.mins) || 0,
-          prob: ev.prob || '',
+          type,
+          prob,
+          cause,
           action: ev.action || '',
         });
       });
@@ -339,7 +362,7 @@ function render(){
   document.getElementById('kpi-avg').textContent = avgMins;
   document.getElementById('kpi-max').textContent = maxEvent ? Math.round(maxEvent.mins) : 0;
   document.getElementById('kpi-max-sub').textContent = maxEvent
-    ? `${escapeHtml(maxEvent.area)} L${escapeHtml(maxEvent.line)} · ${escapeHtml(maxEvent.prob.slice(0,30) || 'no description')}`
+    ? `${escapeHtml(maxEvent.area)} L${escapeHtml(maxEvent.line)} · ${escapeHtml((maxEvent.type==='prod' ? maxEvent.cause : maxEvent.prob).slice(0,30) || 'no description')}`
     : '—';
   document.getElementById('kpi-events-sub').textContent = areaFilter === 'all' ? 'across all areas' : 'in ' + areaFilter;
   document.getElementById('kpi-mins-sub').textContent = areaFilter === 'all' ? 'across all events' : 'in ' + areaFilter;
@@ -405,16 +428,25 @@ function render(){
         <div class="line-body">
           ${lineEvents.map(e => `
             <div class="dt-row">
-              <div class="dt-mins-badge">
+              <div class="dt-mins-badge ${e.type==='prod'?'dt-mins-prod':e.type==='mech'?'dt-mins-mech':''}">
                 ${Math.round(e.mins)}
                 <span class="lbl">MINS</span>
               </div>
               <div class="dt-content">
                 <div class="dt-head">
-                  <div class="dt-time">${escapeHtml(e.from || '?')} → ${escapeHtml(e.to || '?')}</div>
+                  <div class="dt-time">
+                    ${escapeHtml(e.from || '?')} → ${escapeHtml(e.to || '?')}
+                    ${e.type === 'mech' ? '<span class="dt-pill dt-pill-mech">⚙ Mechanical</span>' : ''}
+                    ${e.type === 'prod' ? '<span class="dt-pill dt-pill-prod">📦 Production</span>' : ''}
+                    ${!e.type ? '<span class="dt-pill dt-pill-unk">— Legacy</span>' : ''}
+                  </div>
                   <div class="dt-meta">${escapeHtml(e.tech)} · Shift ${escapeHtml(e.shift)} · ${escapeHtml(String(e.date||'').slice(0,10))} · ${relTime(e.submitted_at)}</div>
                 </div>
-                <div class="dt-problem">${e.prob ? escapeHtml(e.prob) : '<span class="dt-no-action">No problem description</span>'}</div>
+                <div class="dt-problem">${
+                  e.type === 'prod'
+                    ? (e.cause ? escapeHtml(e.cause) : '<span class="dt-no-action">No cause specified</span>')
+                    : (e.prob ? escapeHtml(e.prob) : '<span class="dt-no-action">No problem description</span>')
+                }</div>
                 ${e.action ? `<div class="dt-action">${escapeHtml(e.action)}</div>` : '<div class="dt-no-action">No action recorded</div>'}
               </div>
             </div>

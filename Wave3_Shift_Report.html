@@ -360,7 +360,7 @@ input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0
   </div>
   <div class="hdr-right" id="hdrDate"></div>
 
-  <button class="lang-toggle" onclick="toggleLanguage()" title="Switch language / Cambiar idioma">
+  <button class="lang-toggle" onclick="toggleLanguage()" title="Switch language · Cambiar idioma · Đổi ngôn ngữ">
     <span class="lang-en active">EN</span><span class="lang-es">ES</span>
   </button>
 </header>
@@ -553,10 +553,10 @@ input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0
     </div>
   </div>
 
-  <!-- MAJOR DOWNTIME -->
+  <!-- MECHANICAL DOWNTIME -->
   <div class="card">
     <div class="card-head">
-      <h2 data-i18n="shift.section.major_dt">Major Downtime &gt;20 mins (Machine DT only)</h2>
+      <h2 data-i18n="shift.section.mech_dt">⚙ Mechanical Downtime — 24hr</h2>
       <button onclick="addDTRow()" style="background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:4px 10px;border-radius:5px;cursor:pointer;">+ Add Row</button>
     </div>
     <div class="card-body" style="padding:0">
@@ -566,16 +566,53 @@ input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0
           <th style="width:15%" data-i18n="dt.from">From</th>
           <th style="width:15%" data-i18n="dt.to">To</th>
           <th style="width:15%" data-i18n="dt.downtime">Downtime</th>
-          <th style="width:30%" data-i18n="dt.problem">Problem</th>
+          <th style="width:30%" data-i18n="dt.problem.mech">Problem</th>
           <th style="width:25%" data-i18n="dt.action">Action Taken</th>
         </tr></thead>
         <tbody id="dtBody">
-          <tr>
-            <td><input type="time" id="dt-from-0"></td>
-            <td><input type="time" id="dt-to-0"></td>
-            <td><input type="text" id="dt-mins-0" placeholder="mins"></td>
-            <td><input type="text" id="dt-prob-0" placeholder="Describe problem"></td>
-            <td><input type="text" id="dt-action-0" placeholder="Action taken"></td>
+          <tr data-dt-row="0">
+            <td data-label="From"><input type="time" id="dt-from-0"></td>
+            <td data-label="To"><input type="time" id="dt-to-0"></td>
+            <td data-label="Mins"><input type="text" id="dt-mins-0" placeholder="mins"></td>
+            <td data-label="Problem"><input type="text" id="dt-prob-0" placeholder="Describe problem"></td>
+            <td data-label="Action Taken"><input type="text" id="dt-action-0" placeholder="Action taken"></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTION DOWNTIME -->
+  <div class="card">
+    <div class="card-head">
+      <h2 data-i18n="shift.section.prod_dt">📦 Production Downtime — 24hr</h2>
+      <button onclick="addPDTRow()" style="background:transparent;border:1px solid var(--bdr2);color:var(--mut);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:4px 10px;border-radius:5px;cursor:pointer;">+ Add Row</button>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div class="dt-table-wrap">
+        <table class="dt-table">
+        <thead><tr>
+          <th style="width:18%" data-i18n="dt.from">From</th>
+          <th style="width:18%" data-i18n="dt.to">To</th>
+          <th style="width:18%" data-i18n="dt.downtime">Downtime</th>
+          <th style="width:23%" data-i18n="dt.cause">Cause</th>
+          <th style="width:23%" data-i18n="dt.action">Action Taken</th>
+        </tr></thead>
+        <tbody id="pdtBody">
+          <tr data-pdt-row="0">
+            <td data-label="From"><input type="time" id="pdt-from-0"></td>
+            <td data-label="To"><input type="time" id="pdt-to-0"></td>
+            <td data-label="Mins"><input type="text" id="pdt-mins-0" placeholder="mins"></td>
+            <td data-label="Cause">
+              <select id="pdt-cause-0" class="dt-cause-sel">
+                <option value="">— select cause —</option>
+                <option value="No Material">No Material</option>
+                <option value="No WIP">No WIP</option>
+                <option value="No Operators">No Operators</option>
+              </select>
+            </td>
+            <td data-label="Action Taken"><input type="text" id="pdt-action-0" placeholder="Action taken"></td>
           </tr>
         </tbody>
       </table>
@@ -675,6 +712,7 @@ input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0
 
 <div class="toast" id="toast"></div>
 
+<script src="theme.js"></script>
 <script src="translations.js"></script>
 <script>
 // ── SUPABASE CONFIG ────────────────────────────────────────────────────────────
@@ -724,16 +762,41 @@ function calcTotal(type){
 
 // ── ADD DOWNTIME ROW ──────────────────────────────────────────────────────────
 let dtRowCount = 1;
+// MECHANICAL — free-text problem + action
 function addDTRow(){
   const i = dtRowCount++;
   const tbody = document.getElementById('dtBody');
   const tr = document.createElement('tr');
+  tr.setAttribute('data-dt-row', i);
   tr.innerHTML = `
-    <td><input type="time" id="dt-from-${i}"></td>
-    <td><input type="time" id="dt-to-${i}"></td>
-    <td><input type="text" id="dt-mins-${i}" placeholder="mins"></td>
-    <td><input type="text" id="dt-prob-${i}" placeholder="Describe problem"></td>
-    <td><input type="text" id="dt-action-${i}" placeholder="Action taken"></td>`;
+    <td data-label="From"><input type="time" id="dt-from-${i}"></td>
+    <td data-label="To"><input type="time" id="dt-to-${i}"></td>
+    <td data-label="Mins"><input type="text" id="dt-mins-${i}" placeholder="mins"></td>
+    <td data-label="Problem"><input type="text" id="dt-prob-${i}" placeholder="Describe problem"></td>
+    <td data-label="Action Taken"><input type="text" id="dt-action-${i}" placeholder="Action taken"></td>`;
+  tbody.appendChild(tr);
+}
+
+// PRODUCTION — dropdown cause only
+let pdtRowCount = 1;
+function addPDTRow(){
+  const i = pdtRowCount++;
+  const tbody = document.getElementById('pdtBody');
+  const tr = document.createElement('tr');
+  tr.setAttribute('data-pdt-row', i);
+  tr.innerHTML = `
+    <td data-label="From"><input type="time" id="pdt-from-${i}"></td>
+    <td data-label="To"><input type="time" id="pdt-to-${i}"></td>
+    <td data-label="Mins"><input type="text" id="pdt-mins-${i}" placeholder="mins"></td>
+    <td data-label="Cause">
+      <select id="pdt-cause-${i}" class="dt-cause-sel">
+        <option value="">— select cause —</option>
+        <option value="No Material">No Material</option>
+        <option value="No WIP">No WIP</option>
+        <option value="No Operators">No Operators</option>
+      </select>
+    </td>
+    <td data-label="Action Taken"><input type="text" id="pdt-action-${i}" placeholder="Action taken"></td>`;
   tbody.appendChild(tr);
 }
 
@@ -743,6 +806,7 @@ function collectData(){
   for(let i=1;i<=8;i++) prod.push(document.getElementById('p'+i).value||'');
   const dt = [];
   for(let i=1;i<=8;i++) dt.push(document.getElementById('d'+i).value||'');
+  // Mechanical events (legacy + current shape — type tagged for analytics)
   const dtEvents = [];
   for(let i=0;i<dtRowCount;i++){
     const from   = document.getElementById('dt-from-'+i)?.value||'';
@@ -750,7 +814,21 @@ function collectData(){
     const mins   = document.getElementById('dt-mins-'+i)?.value||'';
     const prob   = document.getElementById('dt-prob-'+i)?.value||'';
     const action = document.getElementById('dt-action-'+i)?.value||'';
-    if(from||to||mins||prob||action) dtEvents.push({from,to,mins,prob,action});
+    if(from||to||mins||prob||action){
+      dtEvents.push({from, to, mins, type:'mech', prob, action});
+    }
+  }
+  // Production events — dropdown cause stored in `cause` (also mirrored in prob for legacy readers)
+  for(let i=0;i<pdtRowCount;i++){
+    const from   = document.getElementById('pdt-from-'+i)?.value||'';
+    const to     = document.getElementById('pdt-to-'+i)?.value||'';
+    const mins   = document.getElementById('pdt-mins-'+i)?.value||'';
+    const cause  = document.getElementById('pdt-cause-'+i)?.value||'';
+    const action = document.getElementById('pdt-action-'+i)?.value||'';
+    if(from||to||mins||cause||action){
+      // Mirror cause in prob so legacy code that reads ev.prob still gets meaningful text
+      dtEvents.push({from, to, mins, type:'prod', cause, prob: cause, action});
+    }
   }
   return {
     submitted_at:       new Date().toISOString(),
@@ -897,12 +975,28 @@ function resetForm(){
   document.querySelectorAll('.yn-btn').forEach(b=>b.className='yn-btn');
   setYN('co','no');
   dtRowCount=1;
-  document.getElementById('dtBody').innerHTML=`<tr>
-    <td><input type="time" id="dt-from-0"></td>
-    <td><input type="time" id="dt-to-0"></td>
-    <td><input type="text" id="dt-mins-0" placeholder="mins"></td>
-    <td><input type="text" id="dt-prob-0" placeholder="Describe problem"></td>
-    <td><input type="text" id="dt-action-0" placeholder="Action taken"></td>
+  document.getElementById('dtBody').innerHTML=`<tr data-dt-row="0">
+    <td data-label="From"><input type="time" id="dt-from-0"></td>
+    <td data-label="To"><input type="time" id="dt-to-0"></td>
+    <td data-label="Mins"><input type="text" id="dt-mins-0" placeholder="mins"></td>
+    <td data-label="Problem"><input type="text" id="dt-prob-0" placeholder="Describe problem"></td>
+    <td data-label="Action Taken"><input type="text" id="dt-action-0" placeholder="Action taken"></td>
+  </tr>`;
+  pdtRowCount=1;
+  const pdtBody = document.getElementById('pdtBody');
+  if(pdtBody) pdtBody.innerHTML=`<tr data-pdt-row="0">
+    <td data-label="From"><input type="time" id="pdt-from-0"></td>
+    <td data-label="To"><input type="time" id="pdt-to-0"></td>
+    <td data-label="Mins"><input type="text" id="pdt-mins-0" placeholder="mins"></td>
+    <td data-label="Cause">
+      <select id="pdt-cause-0" class="dt-cause-sel">
+        <option value="">— select cause —</option>
+        <option value="No Material">No Material</option>
+        <option value="No WIP">No WIP</option>
+        <option value="No Operators">No Operators</option>
+      </select>
+    </td>
+    <td data-label="Action Taken"><input type="text" id="pdt-action-0" placeholder="Action taken"></td>
   </tr>`;
   document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
   document.getElementById('subBtn').className='btn btn-primary';
@@ -1100,11 +1194,16 @@ function renderRepDetails(r){
   // Major downtime events
   if(Array.isArray(r.downtime_events) && r.downtime_events.length > 0){
     html += `<div class="rep-det-section"><div class="rep-det-section-title">Major Downtime Events</div>
-      ${r.downtime_events.map(ev => `
+      ${r.downtime_events.map(ev => {
+        const t = ev.type || (ev.prob ? 'mech' : '');
+        const typeLbl = t === 'mech' ? '<span class="dt-pill dt-pill-mech">⚙ Mechanical</span>' : t === 'prod' ? '<span class="dt-pill dt-pill-prod">📦 Production</span>' : '';
+        const desc = t === 'prod' ? (ev.cause || ev.prob || '') : (ev.prob || '');
+        return `
         <div class="rep-dt-event">
-          <strong>${escRep(ev.from||'?')} → ${escRep(ev.to||'?')} (${escRep(ev.mins||'?')} min)</strong><br>
-          ${escRep(ev.prob||'')}${ev.action?` · Action: ${escRep(ev.action)}`:''}
-        </div>`).join('')}
+          <strong>${escRep(ev.from||'?')} → ${escRep(ev.to||'?')} (${escRep(ev.mins||'?')} min)</strong> ${typeLbl}<br>
+          ${escRep(desc)}${ev.action?` · Action: ${escRep(ev.action)}`:''}
+        </div>`;
+      }).join('')}
     </div>`;
   }
   // Other misc fields (NG parts, scrap, 5S, change over items)
@@ -1188,7 +1287,12 @@ function printReport(id){
   }
   // Major downtime events
   if(Array.isArray(r.downtime_events) && r.downtime_events.length > 0){
-    body += `<h3>Major Downtime Events</h3><table class="dt-table"><tr><th>From</th><th>To</th><th>Mins</th><th>Problem</th><th>Action Taken</th></tr>${r.downtime_events.map(ev => `<tr><td>${escape(ev.from||'?')}</td><td>${escape(ev.to||'?')}</td><td>${escape(ev.mins||'?')}</td><td>${escape(ev.prob||'')}</td><td>${escape(ev.action||'')}</td></tr>`).join('')}</table>`;
+    body += `<h3>Major Downtime Events</h3><table class="dt-table"><tr><th>From</th><th>To</th><th>Mins</th><th>Type</th><th>Problem / Cause</th><th>Action Taken</th></tr>${r.downtime_events.map(ev => {
+      const t = ev.type || (ev.prob ? 'mech' : '');
+      const typeLbl = t === 'mech' ? 'Mechanical' : t === 'prod' ? 'Production' : '';
+      const desc = t === 'prod' ? (ev.cause || ev.prob || '') : (ev.prob || '');
+      return `<tr><td>${escape(ev.from||'?')}</td><td>${escape(ev.to||'?')}</td><td>${escape(ev.mins||'?')}</td><td>${escape(typeLbl)}</td><td>${escape(desc)}</td><td>${escape(ev.action||'')}</td></tr>`;
+    }).join('')}</table>`;
   }
 
   // Other misc fields
@@ -1342,23 +1446,55 @@ async function editReport(id){
     }
   }
 
-  // Populate Major Downtime events
+  // Populate Mechanical + Production downtime tables from the unified events array.
+  // Events with type==='prod' go to the Production table; everything else goes to Mechanical.
   const dtBody = document.getElementById('dtBody');
-  if(dtBody && Array.isArray(r.downtime_events) && r.downtime_events.length > 0){
+  const pdtBody = document.getElementById('pdtBody');
+  if(dtBody && pdtBody && Array.isArray(r.downtime_events) && r.downtime_events.length > 0){
     dtBody.innerHTML = '';
+    pdtBody.innerHTML = '';
     dtRowCount = 0;
+    pdtRowCount = 0;
     r.downtime_events.forEach(ev => {
-      const i = dtRowCount;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input type="time" id="dt-from-${i}" value="${ev.from||''}"></td>
-        <td><input type="time" id="dt-to-${i}" value="${ev.to||''}"></td>
-        <td><input type="text" id="dt-mins-${i}" placeholder="mins" value="${ev.mins||''}"></td>
-        <td><input type="text" id="dt-prob-${i}" placeholder="Describe problem" value="${(ev.prob||'').replace(/"/g,'&quot;')}"></td>
-        <td><input type="text" id="dt-action-${i}" placeholder="Action taken" value="${(ev.action||'').replace(/"/g,'&quot;')}"></td>`;
-      dtBody.appendChild(tr);
-      dtRowCount++;
+      const evType = ev.type || (ev.prob ? 'mech' : '');
+      if(evType === 'prod'){
+        const i = pdtRowCount;
+        const evCause = ev.cause || ev.prob || '';
+        const causeOpts = ['No Material','No WIP','No Operators']
+          .map(c => `<option value="${c}" ${c===evCause?'selected':''}>${c}</option>`).join('');
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-pdt-row', i);
+        tr.innerHTML = `
+          <td data-label="From"><input type="time" id="pdt-from-${i}" value="${ev.from||''}"></td>
+          <td data-label="To"><input type="time" id="pdt-to-${i}" value="${ev.to||''}"></td>
+          <td data-label="Mins"><input type="text" id="pdt-mins-${i}" placeholder="mins" value="${ev.mins||''}"></td>
+          <td data-label="Cause">
+            <select id="pdt-cause-${i}" class="dt-cause-sel">
+              <option value="">— select cause —</option>
+              ${causeOpts}
+            </select>
+          </td>
+          <td data-label="Action Taken"><input type="text" id="pdt-action-${i}" placeholder="Action taken" value="${(ev.action||'').replace(/"/g,'&quot;')}"></td>`;
+        pdtBody.appendChild(tr);
+        pdtRowCount++;
+      } else {
+        // Mechanical (or legacy untyped)
+        const i = dtRowCount;
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-dt-row', i);
+        tr.innerHTML = `
+          <td data-label="From"><input type="time" id="dt-from-${i}" value="${ev.from||''}"></td>
+          <td data-label="To"><input type="time" id="dt-to-${i}" value="${ev.to||''}"></td>
+          <td data-label="Mins"><input type="text" id="dt-mins-${i}" placeholder="mins" value="${ev.mins||''}"></td>
+          <td data-label="Problem"><input type="text" id="dt-prob-${i}" placeholder="Describe problem" value="${(ev.prob||'').replace(/"/g,'&quot;')}"></td>
+          <td data-label="Action Taken"><input type="text" id="dt-action-${i}" placeholder="Action taken" value="${(ev.action||'').replace(/"/g,'&quot;')}"></td>`;
+        dtBody.appendChild(tr);
+        dtRowCount++;
+      }
     });
+    // Ensure at least one empty row in each so user can add new entries
+    if(dtRowCount === 0)  addDTRow();
+    if(pdtRowCount === 0) addPDTRow();
   }
 
   // Update submit button label
